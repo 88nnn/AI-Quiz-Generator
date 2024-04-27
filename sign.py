@@ -87,7 +87,10 @@ def register_user(name, username, email, password):
         with open('config.yaml', 'w') as file:
             yaml.dump(existing_data, file, default_flow_style=False)
         
-        return "계정이 성공적으로 생성되었습니다!"
+        # 회원가입 성공 메시지 출력
+        message = f"계정이 성공적으로 생성되었습니다!\n- 이름: {name}\n- 사용자 이름: {username}\n- 이메일 주소: {email}"
+        return message
+
 
 
 
