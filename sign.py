@@ -109,5 +109,5 @@ def sign():
     existing_username = st.text_input("Enter your username:")
     existing_password = st.text_input("Enter your password:", type="password")
     if st.button("Login"):
-        result = login_user(existing_username, existing_password)
+        result = login_user(existing_username, existing_password, authenticator)
         st.success(result)
