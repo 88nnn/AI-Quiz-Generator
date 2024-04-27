@@ -29,6 +29,8 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
+ 
+    hashed_passwords = auth.Hasher(passwords).generate()
     new_data = {
         "credentials": {
             "usernames": {
