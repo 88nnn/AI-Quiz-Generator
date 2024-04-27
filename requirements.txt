@@ -7,4 +7,7 @@ pytesseract
 pillow
 langchain_community
 scikit-learn
+hashlib
+PyYAML
+streamlit
 streamlit-authenticator
