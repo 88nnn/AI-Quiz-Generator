@@ -1,6 +1,31 @@
+import re
 import yaml
 import streamlit as st
 import bcrypt
+
+def is_valid_username(username):
+    """
+    올바른 형식의 사용자 이름인지 확인합니다.
+    """
+    # 영어 5글자 이상인지 확인
+    if len(username) < 5 or not username.isalpha():
+        return False
+    return True
+
+def is_valid_password(password):
+    """
+    올바른 형식의 비밀번호인지 확인합니다.
+    """
+    # 영어, 숫자, 특수문자(!@#$%^&*-_+=)가 모두 하나 이상 포함되어 있는지 확인
+    if len(password) < 8:
+        return False
+    if not re.search("[a-zA-Z]", password):
+        return False
+    if not re.search("[0-9]", password):
+        return False
+    if not re.search("[!@#$%^&*_\-+=]", password):
+        return False
+    return True
 
 def register_user(name, username, email, password):
     """
@@ -13,6 +38,14 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
+    # 사용자 이름과 비밀번호 형식 확인
+    if not is_valid_username(username):
+        st.error("사용자 이름은 영어로 5글자 이상이어야 합니다.")
+        return "계정 생성 실패: 사용자 이름 형식이 올바르지 않습니다."
+    if not is_valid_password(password):
+        st.error("비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다.")
+        return "계정 생성 실패: 비밀번호 형식이 올바르지 않습니다."
+
     # 비밀번호 해싱
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
