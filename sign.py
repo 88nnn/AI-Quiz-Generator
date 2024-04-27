@@ -1,6 +1,6 @@
 import yaml
 import streamlit as st
-import hashlib
+import bcrypt
 
 def register_user(name, username, email, password):
     """
@@ -14,7 +14,7 @@ def register_user(name, username, email, password):
         str: 성공적인 등록 또는 오류 메시지.
     """
     # 비밀번호 해싱
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
     # 기존 데이터 읽기
     with open('config.yaml', 'r') as file:
@@ -45,6 +45,7 @@ def register_user(name, username, email, password):
         
         st.success("계정이 성공적으로 생성되었습니다!")
         return "계정이 성공적으로 생성되었습니다!"
+
 
 
 def login_user(username, password):
