@@ -79,8 +79,8 @@ def sign():
         
     # User login
     st.header("Login")
-    existing_username = st.text_input("Enter your username:")
-    existing_password = st.text_input("Enter your password:", type="password")
+    existing_username = st.text_input("Enter your username:", key="username_input")
+    existing_password = st.text_input("Enter your password:", type="password", key="password_input")
     if st.button("Login"):
         result = login_user(existing_username, existing_password)
         if result:
