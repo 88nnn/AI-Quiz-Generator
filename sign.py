@@ -33,8 +33,8 @@ def register_user(name, username, email, password):
         "credentials": {
             "usernames": {
                 username: {
-                    "email": email
-                    "name": name
+                    "email": email,
+                    "name": name,
                     "password": auth.Hasher([password]).generate()[0]  # 비밀번호 해싱
                 }
             }
