@@ -34,7 +34,7 @@ def register_user(name, username, email, password):
             "usernames": {
                 username: {
                     "email": email
-                    "name": name,
+                    "name": name
                     "password": auth.Hasher([password]).generate()[0]  # 비밀번호 해싱
                 }
             }
