@@ -1,22 +1,6 @@
-#sign.py
-
 import yaml
 import streamlit as st
-import streamlit_authenticator as auth
-
-
-# 샘플 사용자 데이터베이스 (실제로는 데이터베이스나 API 호출로 대체해야 합니다)
-#authenticator = auth.Authenticate(
- #   config['credentials'],
-  #  config['cookie']['name'],
-   # config['cookie']['key'],
-    #config['cookie']['expiry_days'],
-    #config['preauthorized']
-#)
-
-#names = ["Smith Lang", "sample id"]
-#usernames = ["lsmith", "samid"]
-#passwords = ["123","456"] # yaml 파일 생성하고 비밀번호 지우기!
+import hashlib
 
 def register_user(name, username, email, password):
     """
@@ -29,19 +13,20 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
- 
-    hashed_passwords = auth.Hasher(passwords).generate()
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()  # 비밀번호 해싱
+
     new_data = {
         "credentials": {
             "usernames": {
                 username: {
                     "email": email,
                     "name": name,
-                    "password": auth.Hasher([password]).generate()[0]  # 비밀번호 해싱
+                    "password": hashed_password
                 }
             }
         }
     }
+
     # 기존 데이터 읽기
     with open('config.yaml', 'r') as file:
         existing_data = yaml.safe_load(file)
@@ -55,7 +40,7 @@ def register_user(name, username, email, password):
     
     st.success("계정이 성공적으로 생성되었습니다!")
 
-def login_user(authentication_status, username, password):
+def login_user(username, password):
     """
     기존 사용자를 로그인합니다.
 
@@ -66,35 +51,21 @@ def login_user(authentication_status, username, password):
     Returns:
         str: 성공적인 로그인 또는 오류 메시지.
     """
-
-    authentication_status, username = authenticator.login(username, password)
-    # authentication_status : 인증 상태 (실패=>False, 값없음=>None, 성공=>True)
-    if authentication_status == False:
-        st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
-    if authentication_status == None:
-        st.warning("사용자 이름 또는 비밀번호를 입력해주세요.")
-    if authentication_status:
-        return f"'{username}' 사용자가 성공적으로 로그인되었습니다."
+    # 사용자 정보 확인 및 인증
+    with open('config.yaml', 'r') as file:
+        existing_data = yaml.safe_load(file)
     
-    """if username in users and users[username]["password"] == password:
+    user_info = existing_data['credentials']['usernames'].get(username)
+    if user_info is None:
+        st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
+        return
+    if user_info["password"] == hashlib.sha256(password.encode()).hexdigest():
         return f"'{username}' 사용자가 성공적으로 로그인되었습니다."
     else:
-        return "오류: 잘못된 사용자 이름 또는 비밀번호입니다."
-        """
+        st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
 
 def sign():
     st.title("User Registration & Login")
-    with open('config.yaml') as file:
-        config = yaml.load(file, Loader=auth.SafeLoader)
-     
-    authenticator = auth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days'],
-        config['preauthorized']
-    )
-
     
     # User registration
     st.header("Register")
@@ -109,6 +80,12 @@ def sign():
     # User login
     st.header("Login")
     existing_username = st.text_input("Enter your username:")
+    existing_password = st.text_input("Enter your password:", type="password")
+    if st.button("Login"):
+        result = login_user(existing_username, existing_password)
+        if result:
+            st.success(result)
+
     existing_password = st.text_input("Enter your password:", type="password")
     if st.button("Login"):
         result = login_user(existing_username, existing_password, authenticator)
