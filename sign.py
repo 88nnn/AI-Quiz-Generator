@@ -53,7 +53,7 @@ def register_user(name, username, email, password):
     
     st.success("계정이 성공적으로 생성되었습니다!")
 
-def login_user(name, authentication_status, username, password):
+def login_user(authentication_status, username, password):
     """
     기존 사용자를 로그인합니다.
 
@@ -65,7 +65,7 @@ def login_user(name, authentication_status, username, password):
         str: 성공적인 로그인 또는 오류 메시지.
     """
 
-    name, authentication_status, username = authenticator.login(username, password)
+    authentication_status, username = authenticator.login(username, password)
     # authentication_status : 인증 상태 (실패=>False, 값없음=>None, 성공=>True)
     if authentication_status == False:
         st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
