@@ -124,16 +124,6 @@ def login_user(username, password):
 def sign():
     st.title("User Registration & Login")
     
-    # User registration
-    st.header("Register")
-    new_name = st.text_input("Enter your name:")
-    new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
-    new_email = st.text_input("Enter your email:")
-    new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
-    if st.button("Register"):
-        result = register_user(new_name, new_username, new_email, new_password)
-        st.success(result)
-        
     # User login
     st.header("Login")
     existing_username = st.text_input("Enter your username:", key="username_input")
@@ -142,3 +132,19 @@ def sign():
         result = login_user(existing_username, existing_password)
         if result:
             st.success(result)
+    
+    # Ask for registration
+    st.write("Would you like to register?")
+    if st.button("Register"):
+        show_registration_form()
+
+def show_registration_form():
+    # User registration form
+    st.subheader("Register")
+    new_name = st.text_input("Enter your name:")
+    new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
+    new_email = st.text_input("Enter your email:")
+    new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
+    if st.button("Sign Up"):
+        result = register_user(new_name, new_username, new_email, new_password)
+        st.success(result)
