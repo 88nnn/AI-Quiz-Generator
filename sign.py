@@ -13,32 +13,39 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()  # 비밀번호 해싱
-
-    new_data = {
-        "credentials": {
-            "usernames": {
-                username: {
-                    "email": email,
-                    "name": name,
-                    "password": hashed_password
-                }
-            }
-        }
-    }
+    # 비밀번호 해싱
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
     # 기존 데이터 읽기
     with open('config.yaml', 'r') as file:
         existing_data = yaml.safe_load(file)
     
     # 새로운 계정 정보 추가
-    existing_data['credentials']['usernames'].update(new_data['credentials']['usernames'])
-    
-    # YAML 파일에 쓰기
-    with open('config.yaml', 'w') as file:
-        yaml.dump(existing_data, file, default_flow_style=False)
-    
-    st.success("계정이 성공적으로 생성되었습니다!")
+    if username in existing_data['credentials']['usernames']:
+        st.error("이미 사용 중인 사용자 이름입니다.")
+        return "계정 생성 실패: 이미 사용 중인 사용자 이름입니다."
+    else:
+        new_data = {
+            "credentials": {
+                "usernames": {
+                    username: {
+                        "email": email,
+                        "name": name,
+                        "password": hashed_password
+                    }
+                }
+            }
+        }
+
+        existing_data['credentials']['usernames'].update(new_data['credentials']['usernames'])
+        
+        # YAML 파일에 쓰기
+        with open('config.yaml', 'w') as file:
+            yaml.dump(existing_data, file, default_flow_style=False)
+        
+        st.success("계정이 성공적으로 생성되었습니다!")
+        return "계정이 성공적으로 생성되었습니다!"
+
 
 def login_user(username, password):
     """
