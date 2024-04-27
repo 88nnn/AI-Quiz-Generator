@@ -52,11 +52,11 @@ def register_user(name, username, email, password):
     """
     # 사용자 이름, 비밀번호 및 이메일 형식 확인
     if not is_valid_username(username):
-        return "계정 생성 실패: 사용자 이름은 영어로 5글자 이상이어야 합니다."
+        return "사용자 이름은 영어로 5글자 이상이어야 합니다."
     if not is_valid_password(password):
-        return "계정 생성 실패: 비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다."
+        return "비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다."
     if not is_valid_email(email):
-        return "계정 생성 실패: 올바른 이메일 주소를 입력해주세요."
+        return "올바른 이메일 주소를 입력해주세요."
     
     # 비밀번호 해싱
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -67,7 +67,7 @@ def register_user(name, username, email, password):
     
     # 새로운 계정 정보 추가
     if username in existing_data['credentials']['usernames']:
-        return "계정 생성 실패: 이미 사용 중인 사용자 이름입니다."
+        return "이미 사용 중인 사용자 이름입니다."
     else:
         new_data = {
             "credentials": {
@@ -144,12 +144,16 @@ def show_registration_form():
         new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
         new_email = st.text_input("Enter your email:")
         new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
+        
+        # Submit button
         submit_button = st.form_submit_button(label="Sign Up")
+
+        # Validate inputs and handle submission
         if submit_button:
-            result = register_user(new_name, new_username, new_email, new_password)
-            if "성공적으로" in result:
-                st.success(result)
-            else:
-                st.error(result)
+            error_message = register_user(new_name, new_username, new_email, new_password)
+            if "성공적으로" in error_message:  # 오류 없이 성공했을 때
+                st.success(error_message)
+            else:  # 오류 발생 시
+                st.error(error_message)
 
 
