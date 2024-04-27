@@ -141,10 +141,11 @@ def sign():
 def show_registration_form():
     # User registration form
     st.subheader("Register")
-    new_name = st.text_input("Enter your name:")
-    new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
-    new_email = st.text_input("Enter your email:")
-    new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
-    if st.button("Sign Up"):
+    new_name = st.text_input("Enter your name:", key="new_name_input")
+    new_username = st.text_input("Enter a new username: it must be over 5 alphabets", key="new_username_input")
+    new_email = st.text_input("Enter your email:", key="new_email_input")
+    new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password", key="new_password_input")
+    if st.button("Sign Up", key="signup_button"):
         result = register_user(new_name, new_username, new_email, new_password)
         st.success(result)
+
