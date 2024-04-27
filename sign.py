@@ -27,6 +27,18 @@ def is_valid_password(password):
         return False
     return True
 
+def is_valid_email(email):
+    """
+    올바른 형식의 이메일 주소인지 확인합니다.
+    """
+    # 이메일 주소의 패턴을 확인하는 정규식
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.match(email_pattern, email):
+        return True
+    else:
+        return False
+
+
 def register_user(name, username, email, password):
     """
     새로운 사용자를 등록합니다.
@@ -38,14 +50,17 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
-    # 사용자 이름과 비밀번호 형식 확인
+    # 사용자 이름, 비밀번호 및 이메일 형식 확인
     if not is_valid_username(username):
         st.error("사용자 이름은 영어로 5글자 이상이어야 합니다.")
         return "계정 생성 실패: 사용자 이름 형식이 올바르지 않습니다."
     if not is_valid_password(password):
         st.error("비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다.")
         return "계정 생성 실패: 비밀번호 형식이 올바르지 않습니다."
-
+    if not is_valid_email(email):
+        st.error("올바른 이메일 주소를 입력해주세요.")
+        return "계정 생성 실패: 올바른 이메일 주소를 입력해주세요."
+    
     # 비밀번호 해싱
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
@@ -78,6 +93,7 @@ def register_user(name, username, email, password):
         
         st.success("계정이 성공적으로 생성되었습니다!")
         return "계정이 성공적으로 생성되었습니다!"
+
 
 
 
