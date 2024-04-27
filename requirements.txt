@@ -7,3 +7,4 @@ pytesseract
 pillow
 langchain_community
 scikit-learn
+streamlit-authenticator

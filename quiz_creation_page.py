@@ -134,6 +134,8 @@ def quiz_creation_page():
                     st.write("\n")
                     st.write(f"{question.options}")
                     st.write("\n")
+                    st.write(f"여기는 퀴즈의 구조입니다: {question}")
+                    st.write("\n")
                 user_answer = st.text_input(f"질문{j + 1}에 대한 답변 입력", "1")
                 user_answers.append(user_answer)
                 st.session_state['uanswer'] = user_answers
