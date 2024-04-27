@@ -52,13 +52,10 @@ def register_user(name, username, email, password):
     """
     # 사용자 이름, 비밀번호 및 이메일 형식 확인
     if not is_valid_username(username):
-        st.error("사용자 이름은 영어로 5글자 이상이어야 합니다.")
-        return "계정 생성 실패: 사용자 이름 형식이 올바르지 않습니다."
+        return "계정 생성 실패: 사용자 이름은 영어로 5글자 이상이어야 합니다."
     if not is_valid_password(password):
-        st.error("비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다.")
-        return "계정 생성 실패: 비밀번호 형식이 올바르지 않습니다."
+        return "계정 생성 실패: 비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다."
     if not is_valid_email(email):
-        st.error("올바른 이메일 주소를 입력해주세요.")
         return "계정 생성 실패: 올바른 이메일 주소를 입력해주세요."
     
     # 비밀번호 해싱
@@ -70,7 +67,6 @@ def register_user(name, username, email, password):
     
     # 새로운 계정 정보 추가
     if username in existing_data['credentials']['usernames']:
-        st.error("이미 사용 중인 사용자 이름입니다.")
         return "계정 생성 실패: 이미 사용 중인 사용자 이름입니다."
     else:
         new_data = {
@@ -91,7 +87,6 @@ def register_user(name, username, email, password):
         with open('config.yaml', 'w') as file:
             yaml.dump(existing_data, file, default_flow_style=False)
         
-        st.success("계정이 성공적으로 생성되었습니다!")
         return "계정이 성공적으로 생성되었습니다!"
 
 
@@ -149,6 +144,9 @@ def show_registration_form():
         submit_button = st.form_submit_button(label="Sign Up")
         if submit_button:
             result = register_user(new_name, new_username, new_email, new_password)
-            st.success(result)
+            if "성공적으로" in result:
+                st.success(result)
+            else:
+                st.error(result)
 
 
