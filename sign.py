@@ -1,3 +1,5 @@
+#sign.py
+
 import yaml
 import streamlit as st
 import streamlit_authenticator as auth
@@ -78,10 +80,18 @@ def login_user(name, authentication_status, username, password):
         return "오류: 잘못된 사용자 이름 또는 비밀번호입니다."
         """
 
-def main():
+def sign():
     st.title("User Registration & Login")
     with open('config.yaml') as file:
         config = yaml.load(file, Loader=auth.SafeLoader)
+     
+     authenticator = auth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days'],
+        config['preauthorized']
+    )
 
     
     # User registration
@@ -102,12 +112,3 @@ def main():
         result = login_user(existing_username, existing_password)
         st.success(result)
 
-if __name__ == "__main__":
-    authenticator = auth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days'],
-        config['preauthorized']
-    )
-    main()
