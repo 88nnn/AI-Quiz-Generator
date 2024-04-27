@@ -85,7 +85,7 @@ def sign():
     with open('config.yaml') as file:
         config = yaml.load(file, Loader=auth.SafeLoader)
      
-     authenticator = auth.Authenticate(
+    authenticator = auth.Authenticate(
         config['credentials'],
         config['cookie']['name'],
         config['cookie']['key'],
@@ -111,4 +111,3 @@ def sign():
     if st.button("Login"):
         result = login_user(existing_username, existing_password)
         st.success(result)
-
