@@ -111,9 +111,9 @@ def sign():
     # User registration
     st.header("Register")
     new_name = st.text_input("Enter your name:")
-    new_username = st.text_input("Enter a new username:")
+    new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
     new_email = st.text_input("Enter your email:")
-    new_password = st.text_input("Enter a new password:", type="password")
+    new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
     if st.button("Register"):
         result = register_user(new_name, new_username, new_email, new_password)
         st.success(result)
