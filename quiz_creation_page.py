@@ -13,19 +13,31 @@ import io
 chat_model = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
 
-class CreateQuiz(BaseModel):
+class CreateQuizoub(BaseModel):
     quiz: str = Field(description="만들어진 문제")
-    options: str = Field(description="만들어진 문제의 보기")
-    correct_answer: str = Field(description="만들어진 문제의 답")
+    options1: str = Field(description="만들어진 문제의 첫 번째 보기")
+    options2: str = Field(description="만들어진 문제의 두 번째 보기")
+    options3: str = Field(description="만들어진 문제의 세 번째 보기")
+    options4: str = Field(description="만들어진 문제의 네 번째 보기")
+    correct_answer: str = Field(description="만들어진 문제의 보기중 하나")
+
 
 class CreateQuizsub(BaseModel):
     quiz: str = Field(description="만들어진 문제")
     correct_answer: str = Field(description="만들어진 문제의 답")
 
 
-parser = PydanticOutputParser(pydantic_object=CreateQuiz)
-parser2 = PydanticOutputParser(pydantic_object=CreateQuizsub)
+class CreateQuizTF(BaseModel):
+    quiz: str = Field(description="만들어진 문제")
+    options1: str = Field(description="만들어진 문제의 참 또는 거짓인 보기")
+    options2: str = Field(description="만들어진 문제의 참 또는 거짓인 보기")
+    correct_answer: str = Field(description="만들어진 보기중 하나")
 
+
+# PydanticOutputParser 생성
+parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
+parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
+parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
 
 prompt = PromptTemplate.from_template(
     "{instruction}, Please answer in KOREAN."
@@ -36,13 +48,29 @@ prompt = PromptTemplate.from_template(
     "FORMAT:"
     "{format}"
 )
-prompt2 = prompt.partial(format=parser2.get_format_instructions())
-prompt1 = prompt.partial(format=parser.get_format_instructions())
+promptoub = prompt.partial(format=parseroub.get_format_instructions())
+promptsub = prompt.partial(format=parsersub.get_format_instructions())
+prompttf = prompt.partial(format=parsertf.get_format_instructions())
 
-chain = prompt1 | chat_model | parser
-chain2 = prompt2 | chat_model | parser2
+chainoub = promptoub | chat_model | parseroub
+chainsub = promptsub | chat_model | parsersub
+chaintf = prompttf | chat_model | parsertf
 
+
+# 퀴즈 채점 함수
 @st.experimental_fragment
+def grade_quiz_answers(user_answers, quiz_answers):
+    graded_answers = []
+    for user_answer, quiz_answer in zip(user_answers, quiz_answers):
+        if user_answer.lower() == quiz_answer.lower():
+            graded_answers.append("정답")
+        else:
+            graded_answers.append("오답")
+    st.session_state['ganswer'] = graded_answers
+    return graded_answers
+
+
+# 파일 처리 함수
 def process_file(uploaded_file):
     if uploaded_file is None:
         st.warning("파일을 업로드하세요.")
@@ -65,25 +93,27 @@ def process_file(uploaded_file):
 
     return text_content
 
+
+# 퀴즈 생성 함수
 @st.experimental_fragment
 def generate_quiz(quiz_type, text_content):
     # Generate quiz prompt based on selected quiz type
     if quiz_type == "다중 선택 (객관식)":
-        response = chain.invoke(
+        response = chainoub.invoke(
             {
                 "instruction": "다음 글을 이용해 객관식 퀴즈를 1개 만들어 주세요",
                 "input": str({text_content}),
             }
         )
     elif quiz_type == "주관식":
-        response = chain2.invoke(
+        response = chainsub.invoke(
             {
                 "instruction": "다음 글을 이용해 주관식 퀴즈를 1개 만들어 주세요",
                 "input": str({text_content}),
             }
         )
     elif quiz_type == "OX 퀴즈":
-        response = chain.invoke(
+        response = chaintf.invoke(
             {
                 "instruction": "다음 글을 이용해 참과 거짓, 2개의 보기를 가지는 퀴즈를 1개 만들어 주세요",
                 "input": str({text_content}),
@@ -93,54 +123,50 @@ def generate_quiz(quiz_type, text_content):
 
     return quiz_questions
 
+
+@st.experimental_fragment
+def grade_quiz_answer(user_answer, quiz_answer):
+    if user_answer.lower() == quiz_answer.lower():
+        grade = "정답"
+    else:
+        grade = "오답"
+    return grade
+
+
+# 메인 함수
 def quiz_creation_page():
-    # 퀴즈 유형 선택
-    quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"])
+    placeholder = st.empty()
+    st.session_state.page = 0
+    if st.session_state.page == 0:
+        with placeholder.container():
+            st.title("AI 퀴즈 생성기")
+            st.write(st.session_state.selected_page)
 
-    # 퀴즈 개수 선택
-    num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
+            # 퀴즈 유형 선택
+            quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"])
 
-    # 파일 업로드 옵션
-    st.header("파일 업로드")
-    uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
+            # 퀴즈 개수 선택
+            num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
-    text_content = process_file(uploaded_file)
+            # 파일 업로드 옵션
+            st.header("파일 업로드")
+            uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
 
-    quiz_questions = []
-    quiz_answers = []
-    user_answers = []
+            text_content = process_file(uploaded_file)
 
-    if text_content is not None:
-        if 'quizs' not in st.session_state:
-            st.session_state.quizs = None
-        if st.button('문제 생성 하기'):
-            for i in range(num_quizzes):
-                quiz_questions.append(generate_quiz(quiz_type, text_content))
-                quiz_answers.append(quiz_questions[i].correct_answer)
-            st.session_state['quizs'] = quiz_questions
-            st.session_state['canswer'] = quiz_answers
-            if st.button("퀴즈 채점 페이지로 이동"):  # New button
-                st.experimental_rerun()
+            quiz_questions = []
+            # if 'gene' not in st.session_state:
+            #     st.session_state.gene = None
 
-        if st.session_state.quizs is not None:
-            st.header("생성된 퀴즈")
-            for j, question in enumerate(st.session_state.quizs):
-                if quiz_type == "주관식":
-                    st.write(f"주관식 문제{j+1}: {question.quiz}")
-                    st.write("\n")
-                else:
-                    if quiz_type == "다중 선택 (객관식)":
-                        st.write(f"객관식 문제{j+1}: {question.quiz}")
-                    else:
-                        st.write(f"OX퀴즈 문제{j+1}: {question.quiz}")
-                    st.write("\n")
-                    st.write(f"{question.options}")
-                    st.write("\n")
-                    st.write(f"여기는 퀴즈의 구조입니다: {question}")
-                    st.write("\n")
-                user_answer = st.text_input(f"질문{j + 1}에 대한 답변 입력", "1")
-                user_answers.append(user_answer)
-                st.session_state['uanswer'] = user_answers
-                j += 1
-                st.write("-----------------------------------------")
-                st.write("\n")
+            if text_content is not None:
+
+                if st.button('문제 생성 하기'):
+                    for i in range(num_quizzes):
+                        quiz_questions.append(generate_quiz(quiz_type, text_content))
+                        st.session_state['quizs'] = quiz_questions
+                    st.session_state.selected_page = "퀴즈 풀이"
+                    st.session_state.selected_type = quiz_type
+                    st.session_state.selected_num = num_quizzes
+                    # st.session_state.gene = 1
+            # if st.session_state.gene is not None:
+            #     st.rerun()
