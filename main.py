@@ -4,6 +4,7 @@ import quiz_creation_page
 import quiz_solve_page
 import quiz_grading_page
 import sign
+import topic_creation
 
 def main():
     # 사이드바 메뉴 설정
