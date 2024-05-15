@@ -81,6 +81,32 @@ def make_model(pages):
     # chaintf = prompttf | chat_model | parsertf
     return 0
 
+@st.cache(allow_output_mutation=True)
+def process_file(uploaded_file, text_area_content):
+    if uploaded_file is not None:
+        # 업로드된 파일 처리
+        if uploaded_file.type == "text/plain":
+            text_content = uploaded_file.read().decode("utf-8")
+        elif uploaded_file.type.startswith("image/"):
+            image = Image.open(uploaded_file)
+            text_content = pytesseract.image_to_string(image)
+        elif uploaded_file.type == "application/pdf":
+            pdf_reader = PdfReader(io.BytesIO(uploaded_file.read()))
+            text_content = ""
+            for page in pdf_reader.pages:
+                text_content += page.extract_text()
+        else:
+            st.error("지원하지 않는 파일 형식입니다.")
+            return None
+    elif text_area_content is not None:
+        text_content = text_area_content
+    else:
+        st.warning("파일 또는 텍스트를 업로드하세요.")
+        return None
+
+    return text_content
+
+
 # 파일 처리 함수
 def process_file(uploaded_file):
     if uploaded_file is None:
