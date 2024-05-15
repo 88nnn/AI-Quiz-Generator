@@ -66,7 +66,6 @@ def topic_select():
     return now_topic
 
 def topic_list():
-    from quiz_creation_page import quiz_creation_page
     return topic
 
 def subtopic_select(topic):
