@@ -62,28 +62,32 @@ selected_topics = []
 
 
 def topic_select():
+    from quiz_creation_page import quiz_creation_page
     return now_topic
 
 def topic_list():
+    from quiz_creation_page import quiz_creation_page
     return topic
 
-def subtopic_select(a, b):
-    for i in range(len(selected_topics)):
+def subtopic_select(topic):
+    from quiz_creation_page import quiz_creation_page
+    sub_topics = []
+    for topic in selected_topics:
         if topic == language:
-            subtopics = language_topic
+            sub_topics.extend(language_topic)
         elif topic == mathematic:
-            subtopics = mathematic_topic
+            sub_topics.extend(mathematic_topic)
         elif topic == social_science:
-            subtopics = social_science_topic
+            sub_topics.extend(social_science_topic)
         elif topic == natural_science:
-            subtopics = natural_science_topic
+            sub_topics.extend(natural_science_topic)
         elif topic == humanity:
-            subtopics = humanity_topic
+            sub_topics.extend(humanity_topic)
         elif topic == engineering:
-            subtopics = engineering_topic
+            sub_topics.extend(engineering_topic)
         elif topic == art:
-            subtopics = art_topic
-        return sub_topic
+            sub_topics.extend(art_topic)
+        return sub_topics
 
 
 
