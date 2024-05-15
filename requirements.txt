@@ -11,3 +11,4 @@ PyYAML
 streamlit
 streamlit-authenticator
 bcrypt
+streamlit_option_menu
