@@ -185,9 +185,9 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             #퀴즈 주제 선택
-            topic = [] = st.multiselect("(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic_list)
+            topic = [] = st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic_list)
             #주제 직접 입력
-            own_topic_text = st.text_area("(선택) 원하는 주제를 직접 입력헐 수도 있어요. 복수 입력 가능:")
+            own_topic_text = st.text_area(f"(선택) 원하는 주제를 직접 입력헐 수도 있어요. 복수 입력 가능:")
             #구분자 설정
             delimiters = ['\n', ',', '.', ';', ':', '/']
             # 구분자를 사용하여 주제 분할
@@ -206,7 +206,7 @@ def quiz_creation_page():
 
             if st.button('하위 분류 선택'):
                 sub_topic = []
-                st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", topic_creation.subtopic_select(topic)
+                st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", topic_creation.subtopic_select(topic))
                 own_subtopic_text = st.text_area("(선택) 원하는 주제를 직접 입력하세요. 복수 입력 가능:")
                 own_subtopic = re.split('|'.join(map(re.escape, delimiters)), own_subtopic_text)
                 st.write(sub_topic)
