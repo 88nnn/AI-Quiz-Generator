@@ -16,7 +16,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
-from topic_select import quiz_topic_select
+from topic_quiz import topic_creation
 from PIL import Image
 import pytesseract
 from PyPDF2 import PdfReader
