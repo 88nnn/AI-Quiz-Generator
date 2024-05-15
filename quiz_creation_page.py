@@ -15,8 +15,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
-from topic_creation import topic_select, topic_list
-from sklearn.metrics.pairwise import cosine_similarity
+#from topic_creation import topic_select, topic_list
+#from sklearn.metrics.pairwise import cosine_similarity
 
 class CreateQuizoub(BaseModel):
     quiz: str = Field(description="The created problem")
@@ -186,7 +186,8 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             #퀴즈 주제 선택
-            topic = [] = st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic_list)
+            topic = [film, art]
+            st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic)
             #주제 직접 입력
            
             # 파일 업로드 옵션
