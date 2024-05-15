@@ -1,7 +1,6 @@
 #quiz_creation_page.py
 
 import streamlit as st
-from streamlit_option_menu import option_menu
 from langchain_openai import ChatOpenAI
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.prompts.prompt import PromptTemplate
@@ -17,6 +16,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
+from topic_select from quiz_topic_select
 from PIL import Image
 import pytesseract
 from PyPDF2 import PdfReader
@@ -190,6 +190,11 @@ def quiz_creation_page():
             # 퀴즈 개수 선택
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
+            selected_topics = st.multiselect("(선택) 생성할 퀴즈의 주제를 입력하세요. 복수 입력 가능:", topic)
+            if st.button('하위 분류 선택'):
+                selected_sub_topics = st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", sub_topics)
+                st.write(selected_sub_topics)
+        
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
