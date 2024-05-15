@@ -206,7 +206,7 @@ def quiz_creation_page():
 
             if st.button('하위 분류 선택'):
                 sub_topic = []
-                st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", subtopic_select(topic, sub_topic))
+                st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", topic_creation.subtopic_select(topic)
                 own_subtopic_text = st.text_area("(선택) 원하는 주제를 직접 입력하세요. 복수 입력 가능:")
                 own_subtopic = re.split('|'.join(map(re.escape, delimiters)), own_subtopic_text)
                 st.write(sub_topic)
