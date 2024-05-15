@@ -190,9 +190,10 @@ def quiz_creation_page():
             # 퀴즈 개수 선택
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
-            selected_topics = st.multiselect("(선택) 생성할 퀴즈의 주제를 입력하세요. 복수 입력 가능:", topic)
+            #퀴즈 주제 선택
+            st.multiselect("(선택) 생성할 퀴즈의 주제를 입력하세요. 복수 입력 가능:", topic)
             if st.button('하위 분류 선택'):
-                selected_sub_topics = st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", sub_topics)
+                sub_topic = st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", sub_topic)
                 st.write(selected_sub_topics)
         
             # 파일 업로드 옵션
