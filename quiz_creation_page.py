@@ -1,26 +1,22 @@
 #quiz_creation_page.py
 
+import io
+import re
+import pytesseract
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain.prompts.prompt import PromptTemplate
+from PIL import Image
+from PyPDF2 import PdfReader
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.output_parsers import PydanticOutputParser
-from langchain import hub
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.document_loaders.image import UnstructuredImageLoader
+from langchain.prompts.prompt import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
-from topic_quiz import topic_creation
-from PIL import Image
-import pytesseract
-from PyPDF2 import PdfReader
-import io
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from topic_creation import topic_select, subtopic_select, topic_list
+from sklearn.metrics.pairwise import cosine_similarity
 
 class CreateQuizoub(BaseModel):
     quiz: str = Field(description="The created problem")
@@ -138,8 +134,6 @@ def process_file(uploaded_file):
     texts = text_splitter.create_documents([text_content])
     return texts
 
-    return texts
-
 # 퀴즈 생성 함수
 @st.experimental_fragment
 def generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf):
@@ -191,10 +185,31 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             #퀴즈 주제 선택
-            st.multiselect("(선택) 생성할 퀴즈의 주제를 입력하세요. 복수 입력 가능:", topic)
+            topic = [] = st.multiselect("(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic_list)
+            #주제 직접 입력
+            own_topic_text = st.text_area("(선택) 원하는 주제를 직접 입력헐 수도 있어요. 복수 입력 가능:")
+            #구분자 설정
+            delimiters = ['\n', ',', '.', ';', ':', '/']
+            # 구분자를 사용하여 주제 분할
+            own_topic = re.split('|'.join(map(re.escape, delimiters)), own_topic_text)
+            # 공백 제거 및 빈 문자열 제거
+            own_topic = [topic_list.strip() for topic_list in own_topic if topic_list.strip()]
+            # 기존 주제에 없는 주제만 따로 저장
+            for own_topic, topic_list in zip(own_topic, topic_list):
+                cosimil = cosine_similarity([own_topic], [topic_list])[0][0]
+                if cosimil > 0.9:
+                    own_topic = topic_list
+                else:
+                    new_topic = own_topic
+            #[topic for topic in own_topic if topic not in topic]
+            st.write("사용자가 입력한 주제:", new_topic)
+
             if st.button('하위 분류 선택'):
-                sub_topic = st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", sub_topic)
-                st.write(selected_sub_topics)
+                sub_topic = []
+                st.multiselect(f"(선택) {topic}의 하위 분류를 입력하세요. 복수 입력 가능:", subtopic_select(topic, sub_topic))
+                own_subtopic_text = st.text_area("(선택) 원하는 주제를 직접 입력하세요. 복수 입력 가능:")
+                own_subtopic = re.split('|'.join(map(re.escape, delimiters)), own_subtopic_text)
+                st.write(sub_topic)
         
             # 파일 업로드 옵션
             st.header("파일 업로드")
