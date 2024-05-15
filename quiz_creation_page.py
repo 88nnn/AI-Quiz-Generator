@@ -15,7 +15,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
-from topic_creation import topic_select, subtopic_select, topic_list
+from topic_creation import topic_select, topic_list
 from sklearn.metrics.pairwise import cosine_similarity
 
 class CreateQuizoub(BaseModel):
@@ -168,6 +168,7 @@ def grade_quiz_answer(user_answer, quiz_answer):
         grade = "오답"
     return grade
 
+
 # 메인 함수
 def quiz_creation_page():
     placeholder = st.empty()
@@ -187,7 +188,7 @@ def quiz_creation_page():
             #퀴즈 주제 선택
             topic = [] = st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic_list)
             #주제 직접 입력
-            own_topic_text = st.text_area(f"(선택) 원하는 주제를 직접 입력헐 수도 있어요. 복수 입력 가능:")
+            ###own_topic_text = st.text_area(f"(선택) 원하는 주제를 직접 입력헐 수도 있어요. 복수 입력 가능:")
             #구분자 설정
             delimiters = ['\n', ',', '.', ';', ':', '/']
             # 구분자를 사용하여 주제 분할
@@ -210,7 +211,7 @@ def quiz_creation_page():
                 own_subtopic_text = st.text_area("(선택) 원하는 주제를 직접 입력하세요. 복수 입력 가능:")
                 own_subtopic = re.split('|'.join(map(re.escape, delimiters)), own_subtopic_text)
                 st.write(sub_topic)
-        
+        ###
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
