@@ -1,42 +1,9 @@
-import re
+#sign.py
+
 import yaml
 import streamlit as st
 import bcrypt
-
-def is_valid_username(username):
-    """
-    올바른 형식의 사용자 이름인지 확인합니다.
-    """
-    # 영어 5글자 이상인지 확인
-    if len(username) < 5 or not username.isalpha():
-        return False
-    return True
-
-def is_valid_password(password):
-    """
-    올바른 형식의 비밀번호인지 확인합니다.
-    """
-    # 영어, 숫자, 특수문자(!@#$%^&*-_+=)가 모두 하나 이상 포함되어 있는지 확인
-    if len(password) < 8:
-        return False
-    if not re.search("[a-zA-Z]", password):
-        return False
-    if not re.search("[0-9]", password):
-        return False
-    if not re.search("[!@#$%^&*_\-+=]", password):
-        return False
-    return True
-
-def is_valid_email(email):
-    """
-    올바른 형식의 이메일 주소인지 확인합니다.
-    """
-    # 이메일 주소의 패턴을 확인하는 정규식
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if re.match(email_pattern, email):
-        return True
-    else:
-        return False
+import hashlib
 
 
 def register_user(name, username, email, password):
@@ -50,14 +17,6 @@ def register_user(name, username, email, password):
     Returns:
         str: 성공적인 등록 또는 오류 메시지.
     """
-    # 사용자 이름, 비밀번호 및 이메일 형식 확인
-    if not is_valid_username(username):
-        return "사용자 이름은 영어로 5글자 이상이어야 합니다."
-    if not is_valid_password(password):
-        return "비밀번호는 영어, 숫자, 특수문자(!@#$%^&*_\-+=)가 모두 하나 이상 포함된 8글자 이상이어야 합니다."
-    if not is_valid_email(email):
-        return "올바른 이메일 주소를 입력해주세요."
-    
     # 비밀번호 해싱
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
@@ -67,7 +26,8 @@ def register_user(name, username, email, password):
     
     # 새로운 계정 정보 추가
     if username in existing_data['credentials']['usernames']:
-        return "이미 사용 중인 사용자 이름입니다."
+        st.error("이미 사용 중인 사용자 이름입니다.")
+        return "계정 생성 실패: 이미 사용 중인 사용자 이름입니다."
     else:
         new_data = {
             "credentials": {
@@ -87,11 +47,8 @@ def register_user(name, username, email, password):
         with open('config.yaml', 'w') as file:
             yaml.dump(existing_data, file, default_flow_style=False)
         
-        # 회원가입 성공 메시지 출력
-        message = f"계정이 성공적으로 생성되었습니다!\n- 이름: {name}\n- 사용자 이름: {username}\n- 이메일 주소: {email}"
-        return message
-
-
+        st.success("계정이 성공적으로 생성되었습니다!")
+        return "계정이 성공적으로 생성되었습니다!"
 
 
 
@@ -114,7 +71,7 @@ def login_user(username, password):
     if user_info is None:
         st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
         return
-    if user_info["password"] == hashlib.sha256(password.encode()).hexdigest():
+    if bcrypt.checkpw(password.encode(), user_info["password"].encode()):
         return f"'{username}' 사용자가 성공적으로 로그인되었습니다."
     else:
         st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
@@ -122,6 +79,16 @@ def login_user(username, password):
 def sign():
     st.title("User Registration & Login")
     
+    # User registration
+    st.header("Register")
+    new_name = st.text_input("Enter your name:")
+    new_username = st.text_input("Enter a new username:")
+    new_email = st.text_input("Enter your email:")
+    new_password = st.text_input("Enter a new password:", type="password")
+    if st.button("Register"):
+        result = register_user(new_name, new_username, new_email, new_password)
+        st.success(result)
+        
     # User login
     st.header("Login")
     existing_username = st.text_input("Enter your username:", key="username_input")
@@ -130,30 +97,6 @@ def sign():
         result = login_user(existing_username, existing_password)
         if result:
             st.success(result)
-    
-    # Ask for registration
-    st.write("Would you like to register?")
-    if st.button("Register"):
-        show_registration_form()
 
-def show_registration_form():
-    # User registration form
-    st.subheader("Register")
-    with st.form(key="registration_form"):
-        new_name = st.text_input("Enter your name:")
-        new_username = st.text_input("Enter a new username: it must be over 5 alphabets")
-        new_email = st.text_input("Enter your email:")
-        new_password = st.text_input("Enter a new password: it must have an alphabet, number, and one of !@#$%^&*_\-+= more than one", type="password")
-        
-        # Submit button
-        submit_button = st.form_submit_button(label="Sign Up")
-
-        # Validate inputs and handle submission
-        if submit_button:
-            error_message = register_user(new_name, new_username, new_email, new_password)
-            if "성공적으로" in error_message:  # 오류 없이 성공했을 때
-                st.success(error_message)
-            else:  # 오류 발생 시
-                st.error(error_message)
-
-
+if __name__ == "__main__":
+    sign()
