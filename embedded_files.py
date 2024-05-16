@@ -123,3 +123,46 @@ print("\n")
 my_result = my_collection.delete_many({ "$or": [{ "name": "elotes" }, { "name": "fried rice" }]})
 print("I deleted %x records." %(my_result.deleted_count))
 print("\n")
+
+# 데이터베이스에서 퀴즈를 읽어오는 함수
+def read_quiz_from_mongo():
+    # MongoDB 연결 설정
+    uri = 'mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0'
+    client = MongoClient(uri)
+    
+    # 데이터베이스 및 컬렉션 선택
+    db = client.sample_mflix
+    collection = db.quiz_collection  # 퀴즈를 저장하는 컬렉션 이름
+    
+    # MongoDB에서 퀴즈 문서들 조회
+    quizzes = collection.find({})
+    
+    # 조회된 퀴즈 문서들 반환
+    return quizzes
+
+# 퀴즈 문서를 출력하는 함수
+def display_quizzes(quizzes):
+    for quiz in quizzes:
+        st.write(f"Question: {quiz['question']}")
+        st.write(f"Options:")
+        for i, option in enumerate(quiz['options'], start=1):
+            st.write(f"  {i}. {option}")
+        st.write(f"Correct Answer: {quiz['correct_answer']}")
+        st.write("\n")
+
+# 메인 함수: Streamlit 앱 설정
+def embedded_files():
+    st.title("Quiz Display App")
+    
+    # MongoDB에서 퀴즈 읽어오기
+    quizzes = read_quiz_from_mongo()
+    
+    # 퀴즈 출력
+    if quizzes:
+        display_quizzes(quizzes)
+    else:
+        st.write("No quizzes found.")
+
+# 앱 실행
+if __name__ == "__main__":
+    main()
