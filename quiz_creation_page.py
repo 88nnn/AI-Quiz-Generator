@@ -242,19 +242,19 @@ def quiz_creation_page():
             sub_topics = []
             def subtopic_select(topic):
                 for topic in selected_topics:
-                    if topic == language:
+                    if topic == topic[0]:
                         sub_topics.extend(language_topic)
-                    elif topic == mathematic:
+                    elif topic == topic[1]:
                         sub_topics.extend(mathematic_topic)
-                    elif topic == social_science:
+                    elif topic == topic[2]:
                         sub_topics.extend(social_science_topic) 
-                    elif topic == natural_science:
+                    elif topic == topic[3]:
                         sub_topics.extend(natural_science_topic)
-                    elif topic == humanity:
+                    elif topic == topic[4]:
                         sub_topics.extend(humanity_topic)
-                    elif topic == engineering:
+                    elif topic == topic[5]:
                         sub_topics.extend(engineering_topic) 
-                    elif topic == art:
+                    elif topic == topic[len(topic)]:
                         sub_topics.extend(art_topic)
                         return sub_topics
             if topic is not None:
