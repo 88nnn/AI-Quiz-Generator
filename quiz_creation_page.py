@@ -280,16 +280,17 @@ def quiz_creation_page():
             st.write("선택한 주제:", selected_topics)
             st.write("선택한 하위 분류:", selected_sub_topics)
 
-            def display_prepared_data(prepared_data):
+            if selected_sub_topics == "film":
+                def display_prepared_data(prepared_data):
     # 준비된 데이터를 출력
-                print("RAG 모델 입력 형식에 맞게 변환된 데이터:")
-                print(prepared_data) # MongoDB에서 데이터 불러오기
-                
-            data = load_data_from_mongodb()
+                    print("RAG 모델 입력 형식에 맞게 변환된 데이터:")
+                    print(prepared_data) # MongoDB에서 데이터 불러오기
+                    
+                data = load_data_from_mongodb()
                 # RAG 모델 입력 형식에 맞게 데이터 준비
-            prepared_data = prepare_data_for_rag(data)
+                prepared_data = prepare_data_for_rag(data)
             # 준비된 데이터 출력
-            display_prepared_data(prepared_data)
+                display_prepared_data(prepared_data)
             
             # 파일 업로드 옵션
             st.header("파일 업로드")
