@@ -240,7 +240,7 @@ def quiz_creation_page():
             st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
             #주제 직접 입력
             sub_topics = []
-            def subtopic_select(topic):
+            def subtopic_select(sub_topics, topic):
                 for topic in selected_topics:
                     if topic == topic[0]:
                         sub_topics.append(language_topic)
@@ -258,7 +258,7 @@ def quiz_creation_page():
                         sub_topics.append(art_topic)
                         return sub_topics
             if topic is not None:
-                st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", sub_topics)
+                st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", subtopic_select(sub_topics, topic))
                         
             # 파일 업로드 옵션
             st.header("파일 업로드")
