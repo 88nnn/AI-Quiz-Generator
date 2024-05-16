@@ -17,6 +17,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 #from topic_creation import topic_select, topic_list
 #from sklearn.metrics.pairwise import cosine_similarity
+from pymongo import MongoClient
 
 class CreateQuizoub(BaseModel):
     quiz: str = Field(description="The created problem")
@@ -36,7 +37,24 @@ class CreateQuizTF(BaseModel):
     options2 = ("The true or false option of the created problem")
     correct_answer = ("One of the options1 or options2")
 
-def make_model(pages):
+try:
+    db = client['sample_mflix']  # 데이터베이스 이름
+    collection = db['movies']  # 컬렉션 이름
+
+        # 예제 쿼리: 'Back to the Future' 제목을 가진 영화 검색
+    query = {"title": "Back to the Future"}
+    movie = collection.find_one(query)
+    print(movie)
+
+    # MongoDB 데이터베이스 연결
+    db = client['sample_mflix']
+    collection = db['movies']
+
+    # MongoDB API 엔드포인트 및 API 키
+    endpoint = "https://ap-southeast-1.aws.data.mongodb-api.com/app/data-wmojrxq/endpoint/data/v1/action/insertOne"
+    api_key = "YOUR_API_KEY"  # 적절한 API 키로 변경하세요
+
+    # LLM 및 임베딩 설정
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
     embeddings = OpenAIEmbeddings()
 
@@ -45,18 +63,16 @@ def make_model(pages):
     documents = text_splitter.split_documents(pages)
     vector = FAISS.from_documents(documents, embeddings)
 
-    # PydanticOutputParser 생성
+        # PydanticOutputParser 생성
     parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
     parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
     parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
 
     prompt = PromptTemplate.from_template(
-        "Question: {input}, Please answer in KOREAN."
-
-        "CONTEXT:"
-        "{context}."
-
-        "FORMAT:"
+        "Question: {input}, Please answer in KOREAN.\n\n"
+        "CONTEXT:\n"
+        "{context}.\n\n"
+        "FORMAT:\n"
         "{format}"
     )
     promptoub = prompt.partial(format=parseroub.get_format_instructions())
@@ -73,10 +89,39 @@ def make_model(pages):
     retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
     retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
 
+        # 데이터를 MongoDB에 저장
+    def save_to_mongo(data):
+        collection.insert_one(data)
+
+     # 예제 데이터 저장
+    example_data = {
+        "question": "Example question?",
+        "context": "Example context.",
+        "format": "Example format."
+    }
+    save_to_mongo(example_data)
+
+    # 데이터베이스에서 데이터 읽기
+    def read_from_mongo(query):
+        return collection.find_one(query)
+
+        # 예제 데이터 읽기
+    query = {"question": "Example question?"}
+    retrieved_data = read_from_mongo(query)
+    print(retrieved_data)
+
+except Exception as e:
+    print("Unable to find the document due to the following error: ", e)
+finally:
+    # MongoDB 클라이언트 종료
+    client.close()
+
+    return 0
+
     # chainoub = promptoub | chat_model | parseroub
     # chainsub = promptsub | chat_model | parsersub
     # chaintf = prompttf | chat_model | parsertf
-    return 0
+    
 
 @st.cache(allow_output_mutation=True)
 def process_file(uploaded_file, text_area_content):
