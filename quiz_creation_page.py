@@ -37,11 +37,15 @@ class CreateQuizTF(BaseModel):
     options2 = ("The true or false option of the created problem")
     correct_answer = ("One of the options1 or options2")
 
+# MongoDB 클라이언트 설정
+uri = 'mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0'
+client = MongoClient(uri)
+
 try:
     db = client['sample_mflix']  # 데이터베이스 이름
     collection = db['movies']  # 컬렉션 이름
 
-        # 예제 쿼리: 'Back to the Future' 제목을 가진 영화 검색
+    # 예제 쿼리: 'Back to the Future' 제목을 가진 영화 검색
     query = {"title": "Back to the Future"}
     movie = collection.find_one(query)
     print(movie)
@@ -63,7 +67,7 @@ try:
     documents = text_splitter.split_documents(pages)
     vector = FAISS.from_documents(documents, embeddings)
 
-        # PydanticOutputParser 생성
+    # PydanticOutputParser 생성
     parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
     parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
     parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
@@ -89,11 +93,11 @@ try:
     retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
     retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
 
-        # 데이터를 MongoDB에 저장
+    # 데이터를 MongoDB에 저장
     def save_to_mongo(data):
         collection.insert_one(data)
 
-     # 예제 데이터 저장
+    # 예제 데이터 저장
     example_data = {
         "question": "Example question?",
         "context": "Example context.",
@@ -105,7 +109,7 @@ try:
     def read_from_mongo(query):
         return collection.find_one(query)
 
-        # 예제 데이터 읽기
+    # 예제 데이터 읽기
     query = {"question": "Example question?"}
     retrieved_data = read_from_mongo(query)
     print(retrieved_data)
@@ -116,7 +120,6 @@ finally:
     # MongoDB 클라이언트 종료
     client.close()
 
-    return 0
 
     # chainoub = promptoub | chat_model | parseroub
     # chainsub = promptsub | chat_model | parsersub
