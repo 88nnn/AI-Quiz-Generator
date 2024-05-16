@@ -243,19 +243,19 @@ def quiz_creation_page():
             def subtopic_select(topic):
                 for topic in selected_topics:
                     if topic == topic[0]:
-                        sub_topics.extend(language_topic)
+                        sub_topics.append(language_topic)
                     elif topic == topic[1]:
-                        sub_topics.extend(mathematic_topic)
+                        sub_topics.append(mathematic_topic)
                     elif topic == topic[2]:
-                        sub_topics.extend(social_science_topic) 
+                        sub_topics.append(social_science_topic) 
                     elif topic == topic[3]:
-                        sub_topics.extend(natural_science_topic)
+                        sub_topics.append(natural_science_topic)
                     elif topic == topic[4]:
-                        sub_topics.extend(humanity_topic)
+                        sub_topics.append(humanity_topic)
                     elif topic == topic[5]:
-                        sub_topics.extend(engineering_topic) 
+                        sub_topics.append(engineering_topic) 
                     elif topic == topic[len(topic)]:
-                        sub_topics.extend(art_topic)
+                        sub_topics.append(art_topic)
                         return sub_topics
             if topic is not None:
                 st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", sub_topics)
