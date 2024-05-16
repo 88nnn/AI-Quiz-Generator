@@ -82,7 +82,18 @@ def make_model(pages):
     # chainoub = promptoub | chat_model | parseroub
     # chainsub = promptsub | chat_model | parsersub
     # chaintf = prompttf | chat_model | parsertf
-    
+
+def load_data_from_mongodb():
+    # MongoDB 연결 및 데이터 불러오기
+    client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    db = client["sample_mflix"]
+    collection = db["movies"]
+    data = collection.find({}, {"_id": 0, "text": 1})  # 필요한 필드만 선택하여 가져오기
+    return data
+
+def prepare_data_for_rag(data):
+    # 불러온 데이터를 RAG 모델의 입력 형식에 맞게 변환
+    return "\n".join([doc["text"] for doc in data])
 
 @st.cache(allow_output_mutation=True)
 def process_file(uploaded_file, text_area_content):
@@ -268,6 +279,18 @@ def quiz_creation_page():
 
             st.write("선택한 주제:", selected_topics)
             st.write("선택한 하위 분류:", selected_sub_topics)
+
+            def display_prepared_data(prepared_data):
+    # 준비된 데이터를 출력
+                print("RAG 모델 입력 형식에 맞게 변환된 데이터:")
+                print(prepared_data) # MongoDB에서 데이터 불러오기
+                
+            data = load_data_from_mongodb()
+                # RAG 모델 입력 형식에 맞게 데이터 준비
+            prepared_data = prepare_data_for_rag(data)
+            # 준비된 데이터 출력
+            display_prepared_data(prepared_data)
+            
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
