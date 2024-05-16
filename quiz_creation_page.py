@@ -104,7 +104,7 @@ def fetch_data_from_api(api_endpoint):
     except requests.RequestException as e:
         print(f"Error fetching data: {e}")
         return None
-api_endpoint = EyNaA112apBuVGaPsIzWRDlLC12exoBJeoGJQJUOLwOwDa8qxGq5lf62m4ZSDFle
+api_endpoint = "EyNaA112apBuVGaPsIzWRDlLC12exoBJeoGJQJUOLwOwDa8qxGq5lf62m4ZSDFle"
 data = fetch_data_from_api(api_endpoint)
 
 if data:
