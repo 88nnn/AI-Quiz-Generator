@@ -2,6 +2,7 @@
 
 import io
 import re
+import requests
 import pytesseract
 import streamlit as st
 from PIL import Image
@@ -90,6 +91,27 @@ def load_data_from_mongodb():
     collection = db["movies"]
     data = collection.find({}, {"_id": 0, "text": 1})  # 필요한 필드만 선택하여 가져오기
     return data
+    
+def fetch_data_from_api(api_endpoint):
+    try:
+        response = requests.get(api_endpoint)
+        if response.status_code == 200:
+            data = response.json()  # JSON 형식의 응답을 파이썬 객체로 변환
+            return data
+        else:
+            print(f"Failed to fetch data. Status code: {response.status_code}")
+            return None
+    except requests.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
+api_endpoint = EyNaA112apBuVGaPsIzWRDlLC12exoBJeoGJQJUOLwOwDa8qxGq5lf62m4ZSDFle
+data = fetch_data_from_api(api_endpoint)
+
+if data:
+    # 받아온 데이터를 처리하는 코드 작성
+    print("Received data:", data)
+else:
+    print("Failed to fetch data.")
 
 def prepare_data_for_rag(data):
     # 불러온 데이터를 RAG 모델의 입력 형식에 맞게 변환
