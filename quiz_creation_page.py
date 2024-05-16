@@ -185,7 +185,7 @@ def quiz_creation_page():
             # 퀴즈 개수 선택
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
-            #퀴즈 주제 선택
+            # 퀴즈 주제 선택
             language = "언어"
             english = "영어"
             korean = "한국어"
@@ -225,42 +225,43 @@ def quiz_creation_page():
             engineering_topic = [computer_engineering, architectural_engineering]
             
             art = "예술"
-            # western_art = "서양화"
-            # oriental_art = "동양화"
             film = "영화"
             novel = "소설"
-            art_topic = [film,
-             # western_art,
-             # oriental_art,
-            novel]
-            #topic = [language, mathematic, social_science, natural_science, humanity, engineering, art]
+            art_topic = [film, novel]
+            
             topic = [language + "(미지원)", mathematic + "(미지원)",
              social_science + "(미지원)", natural_science + "(미지원)",
              humanity + "(미지원)", engineering + "(미지원)",
              art + "(영화 분야 지원)"]
-            selected_topics = [] = st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
-            #주제 직접 입력
-            sub_topics = []
-            def subtopic_select(sub_topics, topic, selected_topics):
+
+            selected_topics = st.multiselect("생성할 퀴즈의 주제를 선택하세요. (중복 선택 가능)", topic)
+
+            # 주제 직접 입력
+            def subtopic_select(selected_topics):
+                sub_topics = []
                 for now_topic in selected_topics:
-                    if topic == topic[0]:
-                        sub_topics.append(language_topic)
-                    elif topic == topic[1]:
-                        sub_topics.append(mathematic_topic)
-                    elif topic == topic[2]:
-                        sub_topics.append(social_science_topic) 
-                    elif topic == topic[3]:
-                        sub_topics.append(natural_science_topic)
-                    elif topic == topic[4]:
-                        sub_topics.append(humanity_topic)
-                    elif topic == topic[5]:
-                        sub_topics.append(engineering_topic) 
-                    elif topic == topic[len(topic)]:
-                        sub_topics.append(art_topic)
-                        return sub_topics
-            if topic is not None:
-                selected_sub_topics = [] = st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", subtopic_select(sub_topics, topic, selected_topics))
-                        
+                    if now_topic.startswith(language):
+                        sub_topics.extend(language_topic)
+                    elif now_topic.startswith(mathematic):
+                        sub_topics.extend(mathematic_topic)
+                    elif now_topic.startswith(social_science):
+                        sub_topics.extend(social_science_topic)
+                    elif now_topic.startswith(natural_science):
+                        sub_topics.extend(natural_science_topic)
+                    elif now_topic.startswith(humanity):
+                        sub_topics.extend(humanity_topic)
+                    elif now_topic.startswith(engineering):
+                        sub_topics.extend(engineering_topic)
+                    elif now_topic.startswith(art):
+                        sub_topics.extend(art_topic)
+                return sub_topics
+
+            sub_topics = subtopic_select(selected_topics)
+
+            selected_sub_topics = st.multiselect("선택한 주제의 하위 분류를 선택하세요. (중복 선택 가능)", sub_topics)
+
+            st.write("선택한 주제:", selected_topics)
+            st.write("선택한 하위 분류:", selected_sub_topics)
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
