@@ -165,4 +165,4 @@ def embedded_files():
 
 # 앱 실행
 if __name__ == "__main__":
-    main()
+    embedded_files()
