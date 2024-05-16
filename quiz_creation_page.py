@@ -36,29 +36,7 @@ class CreateQuizTF(BaseModel):
     options1 = ("The true or false option of the created problem")
     options2 = ("The true or false option of the created problem")
     correct_answer = ("One of the options1 or options2")
-
-# MongoDB 클라이언트 설정
-uri = 'mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0'
-client = MongoClient(uri)
-
-try:
-    db = client['sample_mflix']  # 데이터베이스 이름
-    collection = db['movies']  # 컬렉션 이름
-
-    # 예제 쿼리: 'Back to the Future' 제목을 가진 영화 검색
-    query = {"title": "Back to the Future"}
-    movie = collection.find_one(query)
-    print(movie)
-
-    # MongoDB 데이터베이스 연결
-    db = client['sample_mflix']
-    collection = db['movies']
-
-    # MongoDB API 엔드포인트 및 API 키
-    endpoint = "https://ap-southeast-1.aws.data.mongodb-api.com/app/data-wmojrxq/endpoint/data/v1/action/insertOne"
-    api_key = "YOUR_API_KEY"  # 적절한 API 키로 변경하세요
-
-    # LLM 및 임베딩 설정
+def make_model(pages):
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
     embeddings = OpenAIEmbeddings()
 
@@ -73,10 +51,12 @@ try:
     parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
 
     prompt = PromptTemplate.from_template(
-        "Question: {input}, Please answer in KOREAN.\n\n"
-        "CONTEXT:\n"
-        "{context}.\n\n"
-        "FORMAT:\n"
+        "Question: {input}, Please answer in KOREAN."
+
+        "CONTEXT:"
+        "{context}."
+
+        "FORMAT:"
         "{format}"
     )
     promptoub = prompt.partial(format=parseroub.get_format_instructions())
@@ -93,32 +73,10 @@ try:
     retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
     retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
 
-    # 데이터를 MongoDB에 저장
-    def save_to_mongo(data):
-        collection.insert_one(data)
-
-    # 예제 데이터 저장
-    example_data = {
-        "question": "Example question?",
-        "context": "Example context.",
-        "format": "Example format."
-    }
-    save_to_mongo(example_data)
-
-    # 데이터베이스에서 데이터 읽기
-    def read_from_mongo(query):
-        return collection.find_one(query)
-
-    # 예제 데이터 읽기
-    query = {"question": "Example question?"}
-    retrieved_data = read_from_mongo(query)
-    print(retrieved_data)
-
-except Exception as e:
-    print("Unable to find the document due to the following error: ", e)
-finally:
-    # MongoDB 클라이언트 종료
-    client.close()
+    # chainoub = promptoub | chat_model | parseroub
+    # chainsub = promptsub | chat_model | parsersub
+    # chaintf = prompttf | chat_model | parsertf
+    return 0
 
 
     # chainoub = promptoub | chat_model | parseroub
