@@ -85,7 +85,7 @@ def make_model(pages):
 
 def load_data_from_mongodb():
     # MongoDB 연결 및 데이터 불러오기
-    client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0")
     db = client["sample_mflix"]
     collection = db["movies"]
     data = collection.find({}, {"_id": 0, "text": 1})  # 필요한 필드만 선택하여 가져오기
