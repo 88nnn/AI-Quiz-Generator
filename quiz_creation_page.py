@@ -189,7 +189,7 @@ def quiz_creation_page():
             film = "영화"
             art = "예술(미지원)"
             topic = [film, art]
-            st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 가능:", topic)
+            st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
             #주제 직접 입력
            
             # 파일 업로드 옵션
