@@ -4,7 +4,7 @@ import quiz_creation_page
 import quiz_solve_page
 import quiz_grading_page
 import sign
-import embedded_files
+#import embedded_files
 #import topic_creation
 
 def main():
@@ -25,8 +25,8 @@ def main():
         quiz_grading_page.quiz_grading_page()
     elif selected_page == "로그인":
         sign.sign()
-    elif selected_page == "db기반퀴즈":
-        embedded_files.embedded_files()
+    #elif selected_page == "db기반퀴즈":
+     #   embedded_files.embedded_files()
 
 if __name__ == "__main__":
     main()
