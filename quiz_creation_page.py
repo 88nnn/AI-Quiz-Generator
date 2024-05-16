@@ -259,7 +259,7 @@ def quiz_creation_page():
                         sub_topics.append(art_topic)
                         return sub_topics
             if topic is not None:
-                selected_sub_topics = [] = st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", subtopic_select(sub_topics, topic, selected_topic))
+                selected_sub_topics = [] = st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", subtopic_select(sub_topics, topic, selected_topics))
                         
             # 파일 업로드 옵션
             st.header("파일 업로드")
