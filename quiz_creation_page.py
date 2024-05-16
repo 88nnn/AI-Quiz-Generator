@@ -239,7 +239,26 @@ def quiz_creation_page():
              art + "(영화 분야 지원)"]
             st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
             #주제 직접 입력
-           
+            sub_topics = []
+            def subtopic_select(topic):
+                for topic in selected_topics:
+                    if topic == language:
+                        sub_topics.extend(language_topic)
+                    elif topic == mathematic:
+                        sub_topics.extend(mathematic_topic)
+                    elif topic == social_science:
+                        sub_topics.extend(social_science_topic) 
+                    elif topic == natural_science:
+                        sub_topics.extend(natural_science_topic)
+                    elif topic == humanity:
+                        sub_topics.extend(humanity_topic)
+                    elif topic == engineering:
+                        sub_topics.extend(engineering_topic) 
+                    elif topic == art:
+                        sub_topics.extend(art_topic)
+                        return sub_topics
+            st.multiselect(f"(선택) 선택한 주제의 하위 분류도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", sub_topics)
+                        
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
