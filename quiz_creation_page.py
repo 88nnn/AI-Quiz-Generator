@@ -237,10 +237,10 @@ def quiz_creation_page():
              social_science + "(미지원)", natural_science + "(미지원)",
              humanity + "(미지원)", engineering + "(미지원)",
              art + "(영화 분야 지원)"]
-            st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
+            selected_topic = st.multiselect(f"(선택) 생성할 퀴즈의 주제도 선택할 수 있어요. 중복 선택 및 직접 입력 가능:", topic)
             #주제 직접 입력
             sub_topics = []
-            def subtopic_select(sub_topics, topic):
+            def subtopic_select(sub_topics, topic, selected_topic):
                 for topic in selected_topics:
                     if topic == topic[0]:
                         sub_topics.append(language_topic)
