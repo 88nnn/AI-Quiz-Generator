@@ -280,7 +280,7 @@ def quiz_creation_page():
             st.write("선택한 주제:", selected_topics)
             st.write("선택한 하위 분류:", selected_sub_topics)
 
-            if selected_sub_topics == "film":
+            if selected_sub_topics == film || "영화" :
                 def display_prepared_data(prepared_data):
     # 준비된 데이터를 출력
                     print("RAG 모델 입력 형식에 맞게 변환된 데이터:")
