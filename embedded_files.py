@@ -20,7 +20,7 @@ try:
   
 # return a friendly error if a URI error is thrown 
 except pymongo.errors.ConfigurationError:
-  print("An Invalid URI host error was received. Is your Atlas host name correct in your connection string?")
+  st.write(f"An Invalid URI host error was received. Is your Atlas host name correct in your connection string?")
   sys.exit(1)
 
 # use a database named "myDatabase"
@@ -40,7 +40,7 @@ try:
 
 # return a friendly error if an authentication error is thrown
 except pymongo.errors.OperationFailure:
-  print("An authentication error was received. Are your username and password correct in your connection string?")
+  st.write(f"An authentication error was received. Are your username and password correct in your connection string?")
   sys.exit(1)
 
 # INSERT DOCUMENTS
@@ -54,13 +54,13 @@ try:
 
 # return a friendly error if the operation fails
 except pymongo.errors.OperationFailure:
-  print("An authentication error was received. Are you sure your database user is authorized to perform write operations?")
+  st.write(f"An authentication error was received. Are you sure your database user is authorized to perform write operations?")
   sys.exit(1)
 else:
   inserted_count = len(result.inserted_ids)
-  print("I inserted %x documents." %(inserted_count))
+  st.write(f"I inserted %x documents." %(inserted_count))
 
-  print("\n")
+  st.write(f"\n")
 
 # FIND DOCUMENTS
 #
@@ -74,23 +74,23 @@ if result:
     my_recipe = doc['name']
     my_ingredient_count = len(doc['ingredients'])
     my_prep_time = doc['prep_time']
-    print("%s has %x ingredients and takes %x minutes to make." %(my_recipe, my_ingredient_count, my_prep_time))
+    st.write(f"%s has %x ingredients and takes %x minutes to make." %(my_recipe, my_ingredient_count, my_prep_time))
     
 else:
-  print("No documents found.")
+  st.write(f"No documents found.")
 
-print("\n")
+st.write(f"\n")
 
 # We can also find a single document. Let's find a document
 # that has the string "potato" in the ingredients list.
 my_doc = my_collection.find_one({"ingredients": "potato"})
 
 if my_doc is not None:
-  print("A recipe which uses potato:")
-  print(my_doc)
+  st.write(f"A recipe which uses potato:")
+  st.write(my_doc)
 else:
-  print("I didn't find any recipes that contain 'potato' as an ingredient.")
-print("\n")
+  st.write(f"I didn't find any recipes that contain 'potato' as an ingredient.")
+st.write(f"\n")
 
 # UPDATE A DOCUMENT
 #
@@ -103,11 +103,11 @@ print("\n")
 
 my_doc = my_collection.find_one_and_update({"ingredients": "potato"}, {"$set": { "prep_time": 72 }}, new=True)
 if my_doc is not None:
-  print("Here's the updated recipe:")
-  print(my_doc)
+  st.write(f"Here's the updated recipe:")
+  st.write(my_doc)
 else:
-  print("I didn't find any recipes that contain 'potato' as an ingredient.")
-print("\n")
+  st.write(f"I didn't find any recipes that contain 'potato' as an ingredient.")
+st.write(f"\n")
 
 # DELETE DOCUMENTS
 #
@@ -121,9 +121,9 @@ print("\n")
 # in which the "name" field is either "elotes" or "fried rice".
 
 my_result = my_collection.delete_many({ "$or": [{ "name": "elotes" }, { "name": "fried rice" }]})
-print("I deleted %x records." %(my_result.deleted_count))
-print("\n")
-
+st.write(f"I deleted %x records." %(my_result.deleted_count))
+st.write(f"\n")
+"""
 # 데이터베이스에서 퀴즈를 읽어오는 함수
 def read_quiz_from_mongo():
     # MongoDB 연결 설정
@@ -162,7 +162,7 @@ def embedded_files():
         display_quizzes(quizzes)
     else:
         st.write("No quizzes found.")
-
+        """
 # 앱 실행
 if __name__ == "__main__":
     embedded_files()
