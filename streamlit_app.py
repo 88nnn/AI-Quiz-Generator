@@ -17,6 +17,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+
 def preprocess_and_insert_to_db(content, collection):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     docs = text_splitter.split_documents(content)
