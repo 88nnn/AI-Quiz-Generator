@@ -34,25 +34,27 @@ def main():
     # 사용자가 검색할 쿼리 입력
     query = st.text_input("유사한 파일을 검색할 쿼리를 입력하세요:")
 
-    if query:
-        # MongoDB Atlas Vector Search 인스턴스 생성
-        vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-            mongodb_atlas_cluster_uri,
-            f"{DB_NAME}.{COLLECTION_NAME}",
-            OpenAIEmbeddings(),  # OpenAI API Key는 사용하지 않습니다.
-            index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
-        )
+    # 검색 버튼
+    if st.button("검색하기"):
+        if query:
+            # MongoDB Atlas Vector Search 인스턴스 생성
+            vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+                mongodb_atlas_cluster_uri,
+                f"{DB_NAME}.{COLLECTION_NAME}",
+                OpenAIEmbeddings(),  # OpenAIEmbeddings 인스턴스 생성
+                index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
+            )
 
-        # 쿼리를 임베딩하여 유사한 문서 검색
-        results = search_similar_documents(query, vector_search)
+            # 쿼리를 임베딩하여 유사한 문서 검색
+            results = search_similar_documents(query, vector_search)
 
-        # 검색 결과 출력
-        if results:
-            st.subheader("검색 결과:")
-            for result in results:
-                st.write(result)
-        else:
-            st.warning("검색 결과가 없습니다.")
+            # 검색 결과 출력
+            if results:
+                st.subheader("검색 결과:")
+                for result in results:
+                    st.write(result)
+            else:
+                st.warning("검색 결과가 없습니다.")
 
 if __name__ == "__main__":
     main()
