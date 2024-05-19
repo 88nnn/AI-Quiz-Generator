@@ -31,6 +31,10 @@ def main():
 
     st.write(f"Connected to MongoDB database: {DB_NAME}, collection: {COLLECTION_NAME}")
 
+    # 검색 횟수를 세기 위한 session_state 초기화
+    if "search_count" not in st.session_state:
+        st.session_state.search_count = 0
+        
     # 사용자가 검색할 쿼리 입력
     query = st.text_input("유사한 파일을 검색할 쿼리를 입력하세요:")
 
@@ -55,6 +59,8 @@ def main():
                     st.write(result)
             else:
                 st.warning("검색 결과가 없습니다.")
+            st.session_state.search_count += 1
+            st.write(f"총 검색 횟수: {st.session_state.search_count}")
 
 if __name__ == "__main__":
     main()
