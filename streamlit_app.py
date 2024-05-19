@@ -93,7 +93,7 @@ def main():
         vector_search = MongoDBAtlasVectorSearch.from_connection_string(
             mongodb_atlas_cluster_uri,
             f"{DB_NAME}.{COLLECTION_NAME}",
-            OpenAIEmbeddings(openai_api_key=openai_api_key, disallowed_special=()),
+            OpenAIEmbeddings(openai_api_key=OPEN_API_KEY, disallowed_special=()),
             index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
         )
 
