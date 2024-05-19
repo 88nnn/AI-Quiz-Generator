@@ -94,7 +94,7 @@ def process_file(uploaded_file, text_area_content, url_area_content):
             st.error("지원하지 않는 파일 형식입니다.")
             return None
     elif text_area_content:
-        text_content = text_area_content
+        text_content = text_area_content.read().decode("utf-8")
     elif url_area_content:
         loader = RecursiveUrlLoader(url=url_area_content)
         text_content = loader.load()
@@ -150,6 +150,8 @@ def quiz_creation_page():
         st.session_state.selected_page = ""
     if 'quiz_created' not in st.session_state:
         st.session_state.quiz_created = False
+    if 'quizs' not in st.session_state:
+        st.session_state.quizs = []
 
     placeholder = st.empty()
     st.session_state.page = 0
@@ -178,7 +180,7 @@ def quiz_creation_page():
                 documents = [{"page_content": text_content}]
                 st.write(documents)
 
-                if st.button('문제 생성 하기'):
+                if st.button('문제 생성하기'):
                     with st.spinner('퀴즈를 생성 중입니다...'):
                         llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
                         embeddings = OpenAIEmbeddings()
@@ -216,6 +218,7 @@ def quiz_creation_page():
                         retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
                         retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
 
+                        quiz_questions = []
                         for i in range(num_quizzes):
                             quiz_questions.append(generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub,retrieval_chaintf))
                             st.session_state['quizs'] = quiz_questions
