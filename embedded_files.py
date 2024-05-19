@@ -162,7 +162,8 @@ def embedded_files():
         display_quizzes(quizzes)
     else:
         st.write("No quizzes found.")
-        """
+        
 # 앱 실행
 if __name__ == "__main__":
     embedded_files()
+"""
