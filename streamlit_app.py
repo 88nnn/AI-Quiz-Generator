@@ -39,11 +39,11 @@ def main():
         vector_search = MongoDBAtlasVectorSearch.from_connection_string(
             mongodb_atlas_cluster_uri,
             f"{DB_NAME}.{COLLECTION_NAME}",
-            OpenAIEmbeddings,  # OpenAI API Key는 사용하지 않습니다.
+            OpenAIEmbeddings(),  # OpenAI API Key는 사용하지 않습니다.
             index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
         )
 
-        # 유사한 문서 검색
+        # 쿼리를 임베딩하여 유사한 문서 검색
         results = search_similar_documents(query, vector_search)
 
         # 검색 결과 출력
