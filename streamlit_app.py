@@ -2,29 +2,19 @@ import streamlit as st
 from pymongo import MongoClient
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
-import numpy as np
+from langchain_core.embeddings import Embeddings
 
 # 검색 횟수 세기
 if 'search_count' not in st.session_state:
     st.session_state['search_count'] = 0
 
 def search_similar_documents(query, vector_search):
-    embeddings = OpenAIEmbeddings().embed_query(query)
-    
-    # MongoDB aggregation pipeline for vector search
-    pipeline = [
-        {
-            "$vectorSearch": {
-                "index": "vector_index",
-                "path": "embedding",
-                "queryVector": embeddings,
-                "numCandidates": 10,
-                "limit": 5
-            }
-        }
-    ]
-    
-    results = list(vector_search.collection.aggregate(pipeline))
+    embeddings = Embeddings().embed_query(query)
+    # Perform a similarity search
+    results = vector_search.similarity_search_with_score(
+        query_vector=embeddings,
+        k=5  # 상위 5개의 유사한 문서를 검색
+    )
     return results
 
 def main():
@@ -56,9 +46,10 @@ def main():
         
         if query:
             # MongoDB Atlas Vector Search 인스턴스 생성
-            vector_search = MongoDBAtlasVectorSearch(
-                collection=mongodb_collection,
-                embedding=OpenAIEmbeddings(),  # OpenAIEmbeddings 인스턴스 생성
+            vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+                mongodb_atlas_cluster_uri,
+                f"{DB_NAME}.{COLLECTION_NAME}",
+                OpenAIEmbeddings(),  # OpenAIEmbeddings 인스턴스 생성
                 index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
             )
 
