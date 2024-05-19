@@ -31,7 +31,7 @@ def main():
         vector_search = MongoDBAtlasVectorSearch.from_connection_string(
             mongodb_atlas_cluster_uri,
             f"{DB_NAME}.{COLLECTION_NAME}",
-            OpenAIEmbeddings(disallowed_special=()),  # OpenAI API Key는 사용하지 않습니다.
+            OpenAIEmbeddings,  # OpenAI API Key는 사용하지 않습니다.
             index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
         )
 
