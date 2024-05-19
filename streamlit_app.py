@@ -1,3 +1,4 @@
+#리트리버 안 쓴 버전
 import streamlit as st
 from pymongo import MongoClient
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
