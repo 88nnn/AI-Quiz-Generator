@@ -7,7 +7,7 @@ st.title("DB 연결 검증")
 
 # Get OpenAI API Key and MongoDB Atlas Cluster URI
 #openai_api_key = getpass.getpass("OpenAI API Key:")
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY  # Set the API key in the environment
+os.environ[OPENAI_API_KEY] #= OPENAI_API_KEY  # Set the API key in the environment
 st.write("OpenAI API Key has been set.")
 
 # MongoDB Atlas Cluster URI
