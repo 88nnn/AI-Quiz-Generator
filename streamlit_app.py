@@ -45,37 +45,36 @@ def main():
             documents = [{"page_content": text_content}]
             st.write(documents)
         else:
-            st.warning("파일에 텍스트가 없습니다.")
-          text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
-      docs = text_splitter.split_documents(data)
-      print(docs[0])
+            st.warning(f"파일에 텍스트가 없습니다.")
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+    docs = text_splitter.split_documents(data)
+    print(docs[0])
 
 # insert the documents in MongoDB Atlas with their embedding
 
     vector_search = MongoDBAtlasVectorSearch.from_documents(
     documents=docs,
     embedding=OpenAIEmbeddings(disallowed_special=()),
-    collection=MONGODB_COLLECTION,
+    collection=COLLECTION_NAME,
     index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
     )
 
 # Perform a similarity search between the embedding of the query and the embeddings of the documents
 
-     results = vector_search.similarity_search(data=data, k=5, pre_filter={"page": {"$eq": 1}})
-     for result in results:
+    results = vector_search.similarity_search(data=data, k=5, pre_filter={"page": {"$eq": 1}})
+    for result in results:
        st.write(result)
        results = vector_search.similarity_search_with_score(
          data=data, k=5,)
-       for result in results:
-         st.write(result)
-       print(results[0].page_content)
+       st.write(results[0].page_content)
        vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-         MONGODB_ATLAS_CLUSTER_URI,
+         mongodb_atlas_cluster_uri,
          DB_NAME + "." + COLLECTION_NAME,
          OpenAIEmbeddings(disallowed_special=()),
-         index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
+         index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
        )
 
 
 if __name__ == "__main__":
-   main()디버깅해줘
+   main()
