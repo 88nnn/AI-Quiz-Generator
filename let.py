@@ -13,7 +13,7 @@ def main():
 
     # Define database and collection names
     DB_NAME = "sample_mflix"
-    COLLECTION_NAME = "vector_index"
+    COLLECTION_NAME = "embedded_movies"
 
     # Access the MongoDB collection
     mongodb_collection = client[DB_NAME][COLLECTION_NAME]
