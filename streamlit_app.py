@@ -6,14 +6,14 @@ from pymongo import MongoClient
 st.title("DB 연결 검증")
 
 # Get OpenAI API Key and MongoDB Atlas Cluster URI
-//openai_api_key = getpass.getpass("OpenAI API Key:")
+#openai_api_key = getpass.getpass("OpenAI API Key:")
 os.environ["OPENAI_API_KEY"] = openai_api_key  # Set the API key in the environment
 st.write("OpenAI API Key has been set.")
 
 # MongoDB Atlas Cluster URI
 mongodb_atlas_cluster_uri = mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 #mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-//mongodb_atlas_cluster_uri = getpass.getpass("MongoDB Atlas Cluster URI:")
+#mongodb_atlas_cluster_uri = getpass.getpass("MongoDB Atlas Cluster URI:")
 st.write("MongoDB Atlas Cluster URI has been set.")
 
 # Initialize MongoDB python client
