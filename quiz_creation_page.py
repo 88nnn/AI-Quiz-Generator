@@ -260,6 +260,8 @@ def quiz_creation_page():
                     with st.spinner('퀴즈를 생성 중입니다...'):
                         llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
                         embeddings = OpenAIEmbeddings()
+                        # 파일 처리 및 사용자 쿼리 DB 삽입
+                        insert_to_db(text_content)
 
                         # Rag
                         text_splitter = RecursiveCharacterTextSplitter()
