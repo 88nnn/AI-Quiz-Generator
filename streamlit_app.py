@@ -11,7 +11,7 @@ os.environ["OPENAI_API_KEY"] = openai_api_key  # Set the API key in the environm
 st.write("OpenAI API Key has been set.")
 
 # MongoDB Atlas Cluster URI
-mongodb_atlas_cluster_uri = mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+mongodb_atlas_cluster_uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 #mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 #mongodb_atlas_cluster_uri = getpass.getpass("MongoDB Atlas Cluster URI:")
 st.write("MongoDB Atlas Cluster URI has been set.")
