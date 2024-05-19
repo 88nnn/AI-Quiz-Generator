@@ -14,6 +14,4 @@ bcrypt
 streamlit_option_menu
 pymongo
 dnspython
-pymongo.mongo_client
-pymongo.server_api
 getpass
