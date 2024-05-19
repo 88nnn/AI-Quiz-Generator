@@ -44,7 +44,7 @@ def main():
     st.title("DB 연결 검증")
 
     # Get OpenAI API Key
-    os.environ["OPENAI_API_KEY"]
+    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
     st.write("OpenAI API Key has been set.")
 
     # MongoDB Atlas Cluster URI
