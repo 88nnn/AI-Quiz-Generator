@@ -1,10 +1,9 @@
 # db_connect.py
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
-from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -15,16 +14,13 @@ class QuizInput(BaseModel):
 
 # Define function to process user input and retrieve results using RAG model
 def retrieve_results(user_query):
-    # Preprocess user input
-    text_splitter = RecursiveCharacterTextSplitter()
-    documents = text_splitter.split_documents([{"page_content": user_query}])
-
-    # Create RAG chain
-    embeddings = OpenAIEmbeddings(model="gpt-3.5-turbo-0125")
-    vector = FAISS.from_documents(documents, embeddings)
-    document_chain = create_stuff_documents_chain(embeddings)
-    retriever = vector.as_retriever()
-    retrieval_chain = create_retrieval_chain(retriever, document_chain)
+    # Create MongoDB Atlas Vector Search
+    vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+        "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "sample_mflix.embedded_movies",
+        OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
+        index_name="vector_index"
+    )
 
     # Define prompt template
     prompt_template = PromptTemplate.from_template(
@@ -40,6 +36,6 @@ def retrieve_results(user_query):
     prompt = prompt_template.partial(format=parser.get_format_instructions())
 
     # Generate prompt with user input
-    response = retrieval_chain.invoke({"input": prompt.format(input=user_query)})
+    response = vector_search.invoke({"input": prompt.format(input=user_query)})
 
     return response
