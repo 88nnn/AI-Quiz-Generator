@@ -4,6 +4,7 @@ import quiz_creation_page
 import quiz_solve_page
 import quiz_grading_page
 import sign
+import db_connect
 #import embedded_files
 #import topic_creation
 
