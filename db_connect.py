@@ -38,8 +38,8 @@ def retrieve_results(user_query):
     prompt = prompt_template.partial(format="퀴즈 답변 형식을 지정하세요")
 
     # 사용자 입력과 (벡터 유사도)를 고려하여 검색
-    response = vector_search.invoke({"input": prompt.format(input=user_query)})
-    '''response = vector_search.similarity_search_with_score(
-    input=user_query, k=5, pre_filter={"page": {"$eq": 1}})'''
+    #response = vector_search.invoke({"input": prompt.format(input=user_query)})
+    response = vector_search.similarity_search_with_score(
+    input=user_query, k=5, pre_filter={"page": {"$eq": 1}})
 
     return response
