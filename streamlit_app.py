@@ -3,6 +3,14 @@ from pymongo import MongoClient
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 
+def search_similar_documents(query, vector_search):
+    # Perform a similarity search between the embedding of the query and the embeddings of the documents
+    results = vector_search.similarity_search_with_score(
+        query=query,
+        k=5,  # 상위 5개의 유사한 문서를 검색
+    )
+    return results
+
 def main():
     st.title("DB 연결 검증")
 
