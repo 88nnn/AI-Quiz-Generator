@@ -20,6 +20,7 @@ from PIL import Image
 import pytesseract
 from PyPDF2 import PdfReader
 import io
+from db_connect import retrieve_results
 from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 
 class CreateQuizoub(BaseModel):
