@@ -2,7 +2,7 @@
 
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
-from langchain.chains import create_stuff_documents_chain
+from langchain.chains import combine_documents
 from langchain.chains import create_retrieval_chain
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
