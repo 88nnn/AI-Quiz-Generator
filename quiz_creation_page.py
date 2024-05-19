@@ -1,17 +1,23 @@
 import streamlit as st
-from pymongo import MongoClient
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.chains import create_stuff_documents_chain, create_retrieval_chain
+from langchain_openai import ChatOpenAI
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain.prompts.prompt import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+from langchain import hub
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.document_loaders.image import UnstructuredImageLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.prompts import PromptTemplate
-from langchain.pydantic import PydanticOutputParser
-from pydantic import BaseModel, Field
+from langchain_community.vectorstores import FAISS
+from langchain.chains import StuffDocumentsChain, RetrievalChain
 from PIL import Image
-from PyPDF2 import PdfReader
 import pytesseract
+from PyPDF2 import PdfReader
 import io
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 
 class CreateQuizoub(BaseModel):
     quiz: str = Field(description="The created problem")
@@ -47,22 +53,26 @@ def make_model(pages):
 
     prompt = PromptTemplate.from_template(
         "Question: {input}, Please answer in KOREAN."
-        "CONTEXT: {context}."
-        "FORMAT: {format}"
+
+        "CONTEXT:"
+        "{context}."
+
+        "FORMAT:"
+        "{format}"
     )
     promptoub = prompt.partial(format=parseroub.get_format_instructions())
     promptsub = prompt.partial(format=parsersub.get_format_instructions())
     prompttf = prompt.partial(format=parsertf.get_format_instructions())
 
-    document_chainoub = create_stuff_documents_chain(llm, promptoub)
-    document_chainsub = create_stuff_documents_chain(llm, promptsub)
-    document_chaintf = create_stuff_documents_chain(llm, prompttf)
+    document_chainoub = StuffDocumentsChain(llm, promptoub)
+    document_chainsub = StuffDocumentsChain(llm, promptsub)
+    document_chaintf = StuffDocumentsChain(llm, prompttf)
 
     retriever = vector.as_retriever()
 
-    retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
-    retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
-    retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
+    retrieval_chainoub = RetrievalChain(retriever, document_chainoub)
+    retrieval_chainsub = RetrievalChain(retriever, document_chainsub)
+    retrieval_chaintf = RetrievalChain(retriever, document_chaintf)
 
     return retrieval_chainoub, retrieval_chainsub, retrieval_chaintf
 
@@ -133,20 +143,14 @@ def grade_quiz_answer(user_answer, quiz_answer):
 
 # 메인 함수
 def quiz_creation_page():
-    # Initialize session state
-    if 'selected_page' not in st.session_state:
-        st.session_state.selected_page = ""
-    if 'quiz_created' not in st.session_state:
-        st.session_state.quiz_created = False
-    if 'quizs' not in st.session_state:
-        st.session_state.quizs = []
-
     placeholder = st.empty()
     st.session_state.page = 0
     if st.session_state.page == 0:
         with placeholder.container():
             st.title("AI 퀴즈 생성기")
-            
+            if 'selected_page' not in st.session_state:
+                st.session_state.selected_page = ""
+
             # 퀴즈 유형 선택
             quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"])
 
@@ -164,48 +168,15 @@ def quiz_creation_page():
             if documents is not None:
                 st.write("Text content processed successfully:")
                 st.write(documents)
-                st.write("Creating document structure for text splitting:")
-                st.write(documents)
 
                 if st.button('문제 생성 하기'):
                     with st.spinner('퀴즈를 생성 중입니다...'):
-                        llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
-                        embeddings = OpenAIEmbeddings()
-
-                        # Rag
-                        text_splitter = RecursiveCharacterTextSplitter()
-                        documents = text_splitter.split_documents(documents)
-                        vector = FAISS.from_documents(documents, embeddings)
-
-                        # PydanticOutputParser 생성
-                        parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
-                        parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
-                        parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
-
-                        prompt = PromptTemplate.from_template(
-                            "{input}, Please answer in KOREAN."
-                            "CONTEXT:"
-                            "{context}."
-                            "FORMAT:"
-                            "{format}"
-                        )
-                        promptoub = prompt.partial(format=parseroub.get_format_instructions())
-                        promptsub = prompt.partial(format=parsersub.get_format_instructions())
-                        prompttf = prompt.partial(format=parsertf.get_format_instructions())
-
-                        document_chainoub = create_stuff_documents_chain(llm, promptoub)
-                        document_chainsub = create_stuff_documents_chain(llm, promptsub)
-                        document_chaintf = create_stuff_documents_chain(llm, prompttf)
-
-                        retriever = vector.as_retriever()
-
-                        retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
-                        retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
-                        retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
+                        retrieval_chainoub, retrieval_chainsub, retrieval_chaintf = make_model(documents)
 
                         quiz_questions = []
                         for i in range(num_quizzes):
                             quiz_questions.append(generate_quiz(quiz_type, documents, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf))
+
                         st.session_state['quizs'] = quiz_questions
                         st.session_state.selected_page = "퀴즈 풀이"
                         st.session_state.selected_type = quiz_type
