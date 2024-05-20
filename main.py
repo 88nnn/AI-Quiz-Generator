@@ -3,6 +3,8 @@ import quiz_creation_page
 import quiz_solve_page
 import quiz_grading_page
 import sign
+import db_connect
+import uploades
 
 def main():
     selected_page = "퀴즈 생성"
