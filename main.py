@@ -4,7 +4,7 @@ import quiz_solve_page
 import quiz_grading_page
 import sign
 import db_connect
-import uploades
+import uplodes
 
 def main():
     selected_page = "퀴즈 생성"
