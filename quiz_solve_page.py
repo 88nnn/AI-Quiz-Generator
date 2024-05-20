@@ -150,5 +150,10 @@ def quiz_solve_page():
         j += 1
     if st.session_state.number == st.session_state.selected_num:
         if st.button('퀴즈 채점'):
+            st.session_state['total_score'] = st.session_state.number  # 점수를 세션 상태에 저장
             st.switch_page("pages/quiz_grading_page.py")
             #st.rerun()
+            #st.rerun()
+
+if __name__ == "__main__":
+    quiz_solve_page()
