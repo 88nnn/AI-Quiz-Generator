@@ -26,17 +26,17 @@ st.header("데베 확인")
 input_text = st.text_input("사용자 입력")
     
     # 사용자 입력에 대한 프롬프트 템플릿 정의
-    prompt_template = PromptTemplate.from_template(
-        "{input}, Answer please."
-        "context:"
-        "{context}."
-        "topic:"
-        "{topic}."
-        "characteristics:"
-        "{characteristics}."
-        "format:"
-        "{format}"
-    )
+prompt_template = PromptTemplate.from_template(
+    "{input}, Answer please."
+    "context:"
+    "{context}."
+    "topic:"
+    "{topic}."
+    "characteristics:"
+    "{characteristics}."
+    "format:"
+    "{format}"
+)
 
     # 프롬프트 생성
     prompt = prompt_template.partial(format="퀴즈 답변 형식을 지정하세요")
