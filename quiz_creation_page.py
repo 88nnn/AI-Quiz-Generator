@@ -340,6 +340,10 @@ def quiz_creation_page():
             if upload_option == "직접 입력":
                 text_content = process_text(text_content)
 
+            # 사용자 입력값을 바탕으로 쿼리 생성
+            if user_query is None and text_content is not None:
+                user_query = "사용자 입력값을 기반으로한 쿼리 생성"
+
             # 검색 결과 출력
             if user_query is not None:
                 st.write("사용자 쿼리:", user_query)
@@ -405,4 +409,5 @@ def quiz_creation_page():
                 if st.session_state.get('quiz_created', False):
                     if st.button('퀴즈 풀기'):
                         st.switch_page("pages/quiz_solve_page.py")
+
 
