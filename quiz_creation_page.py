@@ -24,6 +24,7 @@ from langchain_community.document_loaders.recursive_url_loader import RecursiveU
 import chardet
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
+import pymongo
 
 """def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
