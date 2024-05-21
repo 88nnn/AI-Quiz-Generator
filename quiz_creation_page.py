@@ -558,7 +558,8 @@ def quiz_creation_page():
 
                 if st.session_state.get('quiz_created', False):
                     if st.button('퀴즈 풀기'):
-                        st.switch_page("pages/quiz_solve_page.py")
+                        st.experimental_rerun()
+
 
 
 if __name__ == "__main__":
