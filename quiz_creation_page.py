@@ -335,7 +335,7 @@ def retrieve_results(user_query):
         }
     ])"""
 
-    if not response:
+    if response is None:
         return None
 
     return response
