@@ -236,7 +236,8 @@ def process_file(uploaded_file, upload_option):
 def retrieve_results(user_query):
     client = pymongo.MongoClient("mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp")
     result = client['sample_mflix']['movies'].aggregate([
-        'compound': {
+        {
+            '$compound': {
                 'must': [
                     {
                         'text': {
@@ -271,20 +272,22 @@ def retrieve_results(user_query):
                     }
                 ]
             }
-    ]
-                                                       ), {
-        '$project': {
-            'title': 1,
-            'plot': 1,
-            'genres': 1,
-            '_id': 0
+        },
+        {
+            '$project': {
+                'title': 1,
+                'plot': 1,
+                'genres': 1,
+                '_id': 0
+            }
         }
-    }
-])
-if not result:
+    ])
+
+    if not result:
         return None
 
     return result
+
     
     
 
