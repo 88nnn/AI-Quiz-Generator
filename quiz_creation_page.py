@@ -272,7 +272,7 @@ def retrieve_results(user_query):
                 ]
             }
     ]
-    }, {
+                                                       ), {
         '$project': {
             'title': 1,
             'plot': 1,
