@@ -21,6 +21,10 @@ def retrieve_results(user_query):
         index_name="vector_index"
     )
 
+st.header("데베 확인")
+
+input_text = st.text_input("사용자 입력")
+    
     # 사용자 입력에 대한 프롬프트 템플릿 정의
     prompt_template = PromptTemplate.from_template(
         "{input}, Answer please."
