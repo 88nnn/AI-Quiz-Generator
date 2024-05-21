@@ -234,24 +234,59 @@ def process_file(uploaded_file, upload_option):
     return texts
 
 def retrieve_results(user_query):
-    # Create MongoDB Atlas Vector Search instance
-    vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-        "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
-        "database.collection",
-        OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
-        index_name="vector_index"
-    )
-
-    # Perform vector search based on user input
-    response = vector_search.similarity_search_with_score(
-        input=user_query, k=5, pre_filter={"page": {"$eq": 1}}
-    )
-
-    # Check if any results are found
-    if not response:
+    client = pymongo.MongoClient("mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp")
+    result = client['sample_mflix']['movies'].aggregate([
+        'compound': {
+                'must': [
+                    {
+                        'text': {
+                            'query': [
+                                'Hawaii', 'Alaska'
+                            ],
+                            'path': 'plot'
+                        }
+                    }, {
+                        'regex': {
+                            'query': '([0-9]{4})',
+                            'path': 'plot',
+                            'allowAnalyzedField': True
+                        }
+                    }
+                ],
+                'mustNot': [
+                    {
+                        'text': {
+                            'query': [
+                                'Comedy', 'Romance'
+                            ],
+                            'path': 'genres'
+                        }
+                    }, {
+                        'text': {
+                            'query': [
+                                'Beach', 'Snow'
+                            ],
+                            'path': 'title'
+                        }
+                    }
+                ]
+            }
+        }
+    }, {
+        '$project': {
+            'title': 1,
+            'plot': 1,
+            'genres': 1,
+            '_id': 0
+        }
+    }
+])
+if not result:
         return None
 
-    return response
+    return result
+    
+    
 
 # 퀴즈 생성 함수
 @st.experimental_fragment
@@ -342,8 +377,14 @@ def quiz_creation_page():
 
             # 사용자 입력값을 바탕으로 쿼리 생성
             user_query = None
-            if user_query is None and text_content is not None:
-                user_query = "사용자 입력값을 기반으로한 쿼리 생성"
+            if user_query is not None:
+                st.write("사용자 쿼리:", user_query)
+                response = retrieve_results(user_query)
+                if response:
+                    st.write("검색 결과:", response)
+                else:
+                    st.warning("검색 결과가 없습니다.")
+
 
             # 검색 결과 출력
             if user_query is not None:
