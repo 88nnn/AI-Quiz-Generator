@@ -416,7 +416,7 @@ def quiz_creation_page():
                 #     # 오류 처리 코드 작성
                 #     text_content = text_input.encoding("utf-8")
 
-            
+            """
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
@@ -429,15 +429,16 @@ def quiz_creation_page():
                     user_query = topic
             else:
                 user_query = None
-
-            user_query = None
-            if user_query is not None:
-                st.write("사용자 쿼리:", user_query)
-                response = retrieve_results(user_query)
-                if response:
-                    st.write("검색 결과:", response)
-                else:
-                    st.warning("검색 결과가 없습니다.")
+"""
+            user_query = "American"
+            if st.button("출력"):
+                if user_query is not None:
+                    st.write("사용자 쿼리:", user_query)
+                    response = retrieve_results(user_query)
+                    if response:
+                        st.write("검색 결과:", response)
+                    else:
+                        st.warning("검색 결과가 없습니다.")
 
 
             elif upload_option == "URL":
