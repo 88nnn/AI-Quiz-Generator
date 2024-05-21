@@ -22,7 +22,28 @@ from PyPDF2 import PdfReader
 import io
 from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 import chardet
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain_openai import OpenAIEmbeddings
 
+def retrieve_results(user_query):
+    # Create MongoDB Atlas Vector Search instance
+    vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+        "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
+        "database.collection",
+        OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
+        index_name="vector_index"
+    )
+
+    # Perform vector search based on user input
+    response = vector_search.similarity_search_with_score(
+        input=user_query, k=5, pre_filter={"page": {"$eq": 1}}
+    )
+
+    # Check if any results are found
+    if not response:
+        return None
+
+    return response
 
 
 examples = [
@@ -132,10 +153,15 @@ class CreateQuizTF(BaseModel):
     options2 = ("The true or false option of the created problem")
     correct_answer = ("One of the options1 or options2")
 
-def make_model(pages):
+@st.cache(allow_output_mutation=True)
+def make_model(documents):
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
     embeddings = OpenAIEmbeddings()
-
+    text_splitter = RecursiveCharacterTextSplitter()
+    documents = text_splitter.split_documents(documents)
+    vector = FAISS.from_documents(documents, embeddings)
+    return llm, vector
+"""
     # Rag
     text_splitter = RecursiveCharacterTextSplitter()
     documents = text_splitter.split_documents(pages)
@@ -173,6 +199,7 @@ def make_model(pages):
     # chainsub = promptsub | chat_model | parsersub
     # chaintf = prompttf | chat_model | parsertf
     return 0
+    """
 
 
 def process_text(text_area_content):
@@ -181,6 +208,7 @@ def process_text(text_area_content):
     return text_content
 
 # 파일 처리 함수
+@st.cache(allow_output_mutation=True)
 def process_file(uploaded_file, upload_option):
 
     uploaded_file = None
@@ -233,11 +261,90 @@ def process_file(uploaded_file, upload_option):
     return texts
 
     return texts
+    
+@st.cache(allow_output_mutation=True)
+def retrieve_results(user_query):
+    client = pymongo.MongoClient("mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp")
+    response = client['sample_mflix']['movies'].aggregate([
+        {
+            '$compound': {
+                'must': [
+                    {
+                        'text': {
+                            'query': [
+                                user_query
+                            ],
+                            'path': 'plot'
+                        }
+                    }, {
+                        'regex': {
+                            'query': '([0-9]{4})',
+                            'path': 'plot',
+                            'allowAnalyzedField': True
+                        }
+                    }
+                ],
+                'mustNot': [
+                    {
+                        'text': {
+                            'query': [
+                                'Comedy', 'Romance'
+                            ],
+                            'path': 'genres'
+                        }
+                    }, {
+                        'text': {
+                            'query': [
+                                'Beach', 'Snow'
+                            ],
+                            'path': 'title'
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            '$project': {
+                'title': 1,
+                'plot': 1,
+                'genres': 1,
+                '_id': 0
+            }
+        }
+    ])
+
+    if not response:
+        return None
+
+    return response
+
 
 # 퀴즈 생성 함수
 @st.experimental_fragment
-def generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf):
+@st.cache(allow_output_mutation=True)
+def generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf, user_query, documents):
+    llm, other_components = make_model(documents)
     # Generate quiz prompt based on selected quiz type
+    quiz_questions = []
+    for example in examples:
+        question = example["Question"]
+        context = example["CONTEXT"].format(context=user_query)
+        format_instructions = example["FORMAT"]
+        answer = example["answer"]
+        
+        prompt_template = PromptTemplate.from_template(
+            f"{question}\n\nCONTEXT:\n{context}\n\nFORMAT:\n{format_instructions}"
+        )
+        prompt = prompt_template.partial(input="Please answer in KOREAN.")
+        
+        document_chain = create_stuff_documents_chain(llm, prompt)
+        retriever = other_components["vector"].as_retriever()
+        retrieval_chain = create_retrieval_chain(retriever, document_chain)
+        
+        response = retrieval_chain.invoke({"input": user_query})
+        if response:
+            quiz_questions.append(response)
+
     if quiz_type == "다중 선택 (객관식)":
         response = retrieval_chainoub.invoke(
             {
@@ -259,7 +366,7 @@ def generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsu
     quiz_questions = response
 
     return quiz_questions
-
+@st.cache(allow_output_mutation=True)
 @st.experimental_fragment
 def grade_quiz_answer(user_answer, quiz_answer):
     if user_answer.lower() == quiz_answer.lower():
@@ -285,17 +392,18 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             # 파일 업로드 옵션 선택
-            upload_option = st.radio("입력 유형을 선택하세요", ("직접 입력", "PDF 파일", "텍스트 파일", "URL", "토픽 선택"))
+            upload_option = st.radio("입력 유형을 선택하세요", ("PDF 파일", "텍스트 파일", "URL", "토픽 선택"))
 
             # 파일 업로드 옵션
             st.header("파일 업로드")
             uploaded_file = None
             text_content = None
+            topic = None
             #uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
 
-            if upload_option == "직접 입력":               
-                text_input = st.text_area("텍스트를 입력하세요.")
-                st.write(text_input)
+            # if upload_option == "직접 입력":               
+            #     text_input = st.text_area("텍스트를 입력하세요.")
+            #     st.write(text_input)
                 # text_content = text_input.load().encoding("utf-8", errors='ignore')
                 
                 # result = chardet.detect(text_input)
@@ -309,13 +417,28 @@ def quiz_creation_page():
                 #     text_content = text_input.encoding("utf-8")
 
             
-            elif upload_option == "토픽 선택":
+            if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
-                   ("수학", "문학", "비문학", "과학"),
+                   ("Action", "American", "비문학", "과학"),
                    index=None,
                    placeholder="토픽을 선택하세요",
-                ) 
+                )
+                # 선택된 토픽에 따라 쿼리 생성
+                if topic is not none:
+                    user_query = topic
+            else:
+                user_query = None
+
+            user_query = None
+            if user_query is not None:
+                st.write("사용자 쿼리:", user_query)
+                response = retrieve_results(user_query)
+                if response:
+                    st.write("검색 결과:", response)
+                else:
+                    st.warning("검색 결과가 없습니다.")
+
 
             elif upload_option == "URL":
                 url_area_content = st.text_area("URL을 입력하세요.")
@@ -336,11 +459,9 @@ def quiz_creation_page():
 
                         # Rag
                         text_splitter = RecursiveCharacterTextSplitter()
-                        st.write(text_input)
                         documents = text_splitter.split_documents(text_content)
-                        st.write(documents)
                         vector = FAISS.from_documents(documents, embeddings)
-                        st.write(vector)
+
 
                         # PydanticOutputParser 생성
                         parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
@@ -376,6 +497,60 @@ def quiz_creation_page():
                         st.session_state.selected_page = "퀴즈 풀이"
                         st.session_state.selected_type = quiz_type
                         st.session_state.selected_num = num_quizzes
+
+                        st.success('퀴즈 생성이 완료되었습니다!')
+                        st.write(quiz_questions)
+                        st.session_state['quiz_created'] = True
+
+                if st.session_state.get('quiz_created', False):
+                    if st.button('퀴즈 풀기'):
+                        st.switch_page("pages/quiz_solve_page.py")
+
+            elif topic is not None:
+                if st.button('문제 생성 하기'):
+                    with st.spinner('퀴즈를 생성 중입니다...'):
+                        llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
+                        embeddings = OpenAIEmbeddings()
+
+                        # Rag
+                        text_splitter = RecursiveCharacterTextSplitter()
+                        # documents = text_splitter.split_documents(text_content)
+                        # vector = FAISS.from_documents(documents, embeddings)
+
+                        # # PydanticOutputParser 생성
+                        # parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
+                        # parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
+                        # parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
+
+                        # prompt = PromptTemplate.from_template(
+                        #     "{input}, Please answer in KOREAN."
+
+                        #     "CONTEXT:"
+                        #     "{context}."
+
+                        #     "FORMAT:"
+                        #     "{format}"
+                        # )
+                        # promptoub = prompt.partial(format=parseroub.get_format_instructions())
+                        # promptsub = prompt.partial(format=parsersub.get_format_instructions())
+                        # prompttf = prompt.partial(format=parsertf.get_format_instructions())
+
+                        # document_chainoub = create_stuff_documents_chain(llm, promptoub)
+                        # document_chainsub = create_stuff_documents_chain(llm, promptsub)
+                        # document_chaintf = create_stuff_documents_chain(llm, prompttf)
+
+                        # retriever = vector.as_retriever()
+
+                        # retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
+                        # retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
+                        # retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
+
+                        # for i in range(num_quizzes):
+                        #     quiz_questions.append(generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub,retrieval_chaintf))
+                        #     st.session_state['quizs'] = quiz_questions
+                        # st.session_state.selected_page = "퀴즈 풀이"
+                        # st.session_state.selected_type = quiz_type
+                        # st.session_state.selected_num = num_quizzes
 
                         st.success('퀴즈 생성이 완료되었습니다!')
                         st.write(quiz_questions)
