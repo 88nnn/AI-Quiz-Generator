@@ -341,6 +341,7 @@ def quiz_creation_page():
                 text_content = process_text(text_content)
 
             # 사용자 입력값을 바탕으로 쿼리 생성
+            user_query = None
             if user_query is None and text_content is not None:
                 user_query = "사용자 입력값을 기반으로한 쿼리 생성"
 
