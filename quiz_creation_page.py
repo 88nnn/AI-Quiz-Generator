@@ -162,7 +162,7 @@ def make_model(documents):
     documents = text_splitter.split_documents(documents)
     vector = FAISS.from_documents(documents, embeddings)
     return llm, vector
-"""
+
     # Rag
     text_splitter = RecursiveCharacterTextSplitter()
     documents = text_splitter.split_documents(pages)
@@ -200,7 +200,7 @@ def make_model(documents):
     # chainsub = promptsub | chat_model | parsersub
     # chaintf = prompttf | chat_model | parsertf
     return 0
-    """
+
 
 
 def process_text(text_area_content):
@@ -417,7 +417,7 @@ def quiz_creation_page():
                 #     # 오류 처리 코드 작성
                 #     text_content = text_input.encoding("utf-8")
 
-            """
+            
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
@@ -430,9 +430,8 @@ def quiz_creation_page():
                     user_query = topic
             else:
                 user_query = None
-"""
-            user_query = "American"
-            if st.button("출력"):
+                
+            if st.button("주제 선택 완료"):
                 if user_query is not None:
                     st.write("사용자 쿼리:", user_query)
                     response = retrieve_results(user_query)
