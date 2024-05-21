@@ -312,9 +312,7 @@ def quiz_creation_page():
             text_content = None
             #uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
 
-            # if upload_option == "직접 입력":               
-            #     text_input = st.text_area("텍스트를 입력하세요.")
-            #     text_content = text_input.read().decode("utf-8")
+            # 토픽 선택 옵션
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
@@ -322,15 +320,34 @@ def quiz_creation_page():
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
-
-            elif upload_option == "URL":
-                url_area_content = st.text_area("URL을 입력하세요.")
-                loader = RecursiveUrlLoader(url=url_area_content)
-                text_content = loader.load()
-                
+                # 선택된 토픽에 따라 쿼리 생성
+                if topic == "토픽1":
+                    user_query = "토픽1에 대한 쿼리 생성"
+                elif topic == "토픽2":
+                    user_query = "토픽2에 대한 쿼리 생성"
+                elif topic == "토픽3":
+                    user_query = "토픽3에 대한 쿼리 생성"
+                elif topic == "토픽4":
+                    user_query = "토픽4에 대한 쿼리 생성"
             else:
+                user_query = None
+
+            # 파일 업로드에 따른 텍스트 처리
+            if upload_option != "토픽 선택":
                 text_content = process_file(uploaded_file, upload_option)
-            
+
+            # 텍스트 입력 처리
+            if upload_option == "직접 입력":
+                text_content = process_text(text_content)
+
+            # 검색 결과 출력
+            if user_query is not None:
+                st.write("사용자 쿼리:", user_query)
+                response = retrieve_results(user_query)
+                if response:
+                    st.write("검색 결과:", response)
+                else:
+                    st.warning("검색 결과가 없습니다.")
 
             quiz_questions = []
 
@@ -389,6 +406,3 @@ def quiz_creation_page():
                     if st.button('퀴즈 풀기'):
                         st.switch_page("pages/quiz_solve_page.py")
 
-
-if __name__ == "__main__":
-    quiz_creation_page()
