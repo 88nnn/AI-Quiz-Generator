@@ -25,7 +25,7 @@ import chardet
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 
-def retrieve_results(user_query):
+"""def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
     vector_search = MongoDBAtlasVectorSearch.from_connection_string(
         "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
@@ -44,7 +44,7 @@ def retrieve_results(user_query):
         return None
 
     return response
-
+"""
 
 examples = [
     {
