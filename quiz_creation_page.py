@@ -316,14 +316,14 @@ def quiz_creation_page():
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
-                   ("토픽1", "토픽2", "토픽3" , "토픽4"),
+                   ("액션", "미국인", "토픽3" , "토픽4"),
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
                 # 선택된 토픽에 따라 쿼리 생성
-                if topic == "토픽1":
+                if topic == "액션":
                     user_query = "토픽1에 대한 쿼리 생성"
-                elif topic == "토픽2":
+                elif topic == "미국인":
                     user_query = "토픽2에 대한 쿼리 생성"
                 elif topic == "토픽3":
                     user_query = "토픽3에 대한 쿼리 생성"
