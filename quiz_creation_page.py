@@ -25,6 +25,7 @@ import chardet
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 import pymongo
+import datetime
 
 """def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
