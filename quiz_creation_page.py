@@ -2,7 +2,6 @@
 
 import streamlit as st
 from langchain_openai import ChatOpenAI
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.prompts.prompt import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
@@ -22,6 +21,8 @@ import pytesseract
 from PyPDF2 import PdfReader
 import io
 from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+import chardet
+
 
 
 examples = [
@@ -233,64 +234,6 @@ def process_file(uploaded_file, upload_option):
 
     return texts
 
-def retrieve_results(user_query):
-    client = pymongo.MongoClient("mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp")
-    result = client['sample_mflix']['movies'].aggregate([
-        {
-            '$compound': {
-                'must': [
-                    {
-                        'text': {
-                            'query': [
-                                user_query
-                            ],
-                            'path': 'plot'
-                        }
-                    }, {
-                        'regex': {
-                            'query': '([0-9]{4})',
-                            'path': 'plot',
-                            'allowAnalyzedField': True
-                        }
-                    }
-                ],
-                'mustNot': [
-                    {
-                        'text': {
-                            'query': [
-                                'Comedy', 'Romance'
-                            ],
-                            'path': 'genres'
-                        }
-                    }, {
-                        'text': {
-                            'query': [
-                                'Beach', 'Snow'
-                            ],
-                            'path': 'title'
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            '$project': {
-                'title': 1,
-                'plot': 1,
-                'genres': 1,
-                '_id': 0
-            }
-        }
-    ])
-
-    if not result:
-        return None
-
-    return result
-
-    
-    
-
 # 퀴즈 생성 함수
 @st.experimental_fragment
 def generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf):
@@ -342,7 +285,7 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             # 파일 업로드 옵션 선택
-            upload_option = st.radio("입력 유형을 선택하세요", ("이미지 파일", "PDF 파일", "텍스트 파일", "URL", "토픽 선택"))
+            upload_option = st.radio("입력 유형을 선택하세요", ("직접 입력", "PDF 파일", "텍스트 파일", "URL", "토픽 선택"))
 
             # 파일 업로드 옵션
             st.header("파일 업로드")
@@ -350,47 +293,38 @@ def quiz_creation_page():
             text_content = None
             #uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
 
-            # 토픽 선택 옵션
-            if upload_option == "토픽 선택":
+            if upload_option == "직접 입력":               
+                text_input = st.text_area("텍스트를 입력하세요.")
+                st.write(text_input)
+                # text_content = text_input.load().encoding("utf-8", errors='ignore')
+                
+                # result = chardet.detect(text_input)
+                # encoding = result['encoding']
+                # text_content = text_input.decode(encoding)
+          
+                # try:
+                #     text_content = text_input.encoding("utf-8")
+                # except UnicodeDecodeError:
+                #     # 오류 처리 코드 작성
+                #     text_content = text_input.encoding("utf-8")
+
+            
+            elif upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
-                   ("액션", "미국인", "토픽3" , "토픽4"),
+                   ("수학", "문학", "비문학", "과학"),
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
-                # 선택된 토픽에 따라 쿼리 생성
-                if topic is not none:
-                    user_query = topic
+
+            elif upload_option == "URL":
+                url_area_content = st.text_area("URL을 입력하세요.")
+                loader = RecursiveUrlLoader(url=url_area_content)
+                text_content = loader.load()
+                
             else:
-                user_query = None
-
-            # 파일 업로드에 따른 텍스트 처리
-            if upload_option != "토픽 선택":
                 text_content = process_file(uploaded_file, upload_option)
-
-            # 텍스트 입력 처리
-            if upload_option == "직접 입력":
-                text_content = process_text(text_content)
-
-            # 사용자 입력값을 바탕으로 쿼리 생성
-            user_query = None
-            if user_query is not None:
-                st.write("사용자 쿼리:", user_query)
-                response = retrieve_results(user_query)
-                if response:
-                    st.write("검색 결과:", response)
-                else:
-                    st.warning("검색 결과가 없습니다.")
-
-
-            # 검색 결과 출력
-            if user_query is not None:
-                st.write("사용자 쿼리:", user_query)
-                response = retrieve_results(user_query)
-                if response:
-                    st.write("검색 결과:", response)
-                else:
-                    st.warning("검색 결과가 없습니다.")
+            
 
             quiz_questions = []
 
@@ -402,9 +336,11 @@ def quiz_creation_page():
 
                         # Rag
                         text_splitter = RecursiveCharacterTextSplitter()
+                        st.write(text_input)
                         documents = text_splitter.split_documents(text_content)
+                        st.write(documents)
                         vector = FAISS.from_documents(documents, embeddings)
-                        retrieve_results(text_content)
+                        st.write(vector)
 
                         # PydanticOutputParser 생성
                         parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
@@ -450,3 +386,5 @@ def quiz_creation_page():
                         st.switch_page("pages/quiz_solve_page.py")
 
 
+if __name__ == "__main__":
+    quiz_creation_page()
