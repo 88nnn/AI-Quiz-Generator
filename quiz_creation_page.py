@@ -425,7 +425,7 @@ def quiz_creation_page():
                    placeholder="토픽을 선택하세요",
                 )
                 # 선택된 토픽에 따라 쿼리 생성
-                if topic is not none:
+                if topic is not None:
                     user_query = topic
             else:
                 user_query = None
