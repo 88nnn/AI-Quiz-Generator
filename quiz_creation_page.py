@@ -242,7 +242,7 @@ def retrieve_results(user_query):
                     {
                         'text': {
                             'query': [
-                                'Hawaii', 'Alaska'
+                                user_query
                             ],
                             'path': 'plot'
                         }
@@ -359,14 +359,8 @@ def quiz_creation_page():
                    placeholder="토픽을 선택하세요",
                 ) 
                 # 선택된 토픽에 따라 쿼리 생성
-                if topic == "액션":
-                    user_query = "토픽1에 대한 쿼리 생성"
-                elif topic == "미국인":
-                    user_query = "토픽2에 대한 쿼리 생성"
-                elif topic == "토픽3":
-                    user_query = "토픽3에 대한 쿼리 생성"
-                elif topic == "토픽4":
-                    user_query = "토픽4에 대한 쿼리 생성"
+                if topic is not none:
+                    user_query = topic
             else:
                 user_query = None
 
