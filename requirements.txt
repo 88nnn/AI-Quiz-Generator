@@ -3,12 +3,13 @@ PyPDF2
 langchain
 openai
 langchain_openai
+langchain_core
 pytesseract
 pillow
+faiss-cpu
 langchain_community
 scikit-learn
 PyYAML
-streamlit
 streamlit-authenticator
 bcrypt
 streamlit_option_menu
@@ -16,3 +17,8 @@ pymongo
 dnspython
 chardet
 datetime
+langchain_mongodb
+requests
+numpy
+chromadb
+schema
