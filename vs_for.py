@@ -52,7 +52,7 @@ rag_chain = (
     {"context": RunnablePassthrough() | format_docs, "question": RunnablePassthrough()}
     | custom_rag_prompt
     | llm
-    | StrOutputParser()
+    | PydanticOutputParser()
 )
 
 # Function to retrieve results from the vector search
