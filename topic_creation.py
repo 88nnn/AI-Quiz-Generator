@@ -60,7 +60,7 @@ selected_topics = []
 def topic_list():
     return topic
 
-def subtopic_select(topic):
+def subtopic_select(selected_topic):
     from quiz_creation_page import quiz_creation_page
     sub_topics = []
     for topic in selected_topics:
