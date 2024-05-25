@@ -54,10 +54,6 @@ art_topic = [film,
 
 topic = [language, mathematic, social_science, natural_science,
          humanity, engineering, art]
-now_topic = [language + "(미지원)", mathematic + "(미지원)",
-             social_science + "(미지원)", natural_science + "(미지원)",
-             humanity + "(미지원)", engineering + "(미지원)",
-             art + "(영화 분야 지원)"]
 selected_topics = []
 
 
