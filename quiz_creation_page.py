@@ -83,8 +83,8 @@ class CreateQuizvcs(BaseModel):
 def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
     vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-        "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
-        "database.collection",
+        "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "sample_mflix.embedded_movies",
         OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
         index_name="vector_index"
     )
