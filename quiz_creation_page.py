@@ -30,6 +30,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from pymongo import MongoClient
 import pymongo
+import topic_creation
 
 def connect_db():
     client = MongoClient('mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -420,12 +421,13 @@ def quiz_creation_page():
 
             
             if upload_option == "토픽 선택":
+                
                 topic = st.selectbox(
-                   "토픽을 선택하세요",
-                   ("수학", "문학", "비문학", "과학", "Action", "American"),
+                   topic_list(),
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
+                topic = append(subtopic_select(topic))
 
             elif upload_option == "URL":
                 url_area_content = st.text_area("URL을 입력하세요.")
