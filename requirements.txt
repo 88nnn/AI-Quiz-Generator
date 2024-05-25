@@ -10,7 +10,7 @@ faiss-cpu
 langchain_community
 scikit-learn
 PyYAML
-streamlit-authenticator
+streamlit_authenticator
 bcrypt
 streamlit_option_menu
 pymongo
@@ -22,3 +22,4 @@ requests
 numpy
 chromadb
 schema
+googletrans
