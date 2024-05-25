@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnablePassthrough
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from googletrans import Translator
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel
 import pprint
 
 # MongoDB URI
@@ -85,10 +85,10 @@ def retrieve_results(user_query):
 
             # Display the question and the generated answer
             st.text(f"Question ({lang}): " + query)
-            st.text("Answer: " + response['answer'])
+            st.text("Answer: " + response.answer)
 
             # Collect responses
-            responses.append((query, response['answer']))
+            responses.append((query, response.answer))
 
     # Display the source documents for debugging purposes
     st.text("\nSource documents:")
