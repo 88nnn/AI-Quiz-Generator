@@ -39,6 +39,18 @@ vector_search = MongoDBAtlasVectorSearch.from_connection_string(
     index_name="vector_index_test"
 )
 
+query = "MongoDB Atlas security"
+results = vector_search.similarity_search_with_score(
+   query = query, k = 3
+)
+
+# Split PDF into documents
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
+docs = text_splitter.split_documents(data)
+# Print the first document
+docs[0]
+
+
 # Define Pydantic models for quiz creation
 class CreateQuizMC(BaseModel, ans):
     quiz: str = Field(description="The created problem")
@@ -70,12 +82,36 @@ def retrieve_results(user_query):
     response = vector_search.similarity_search_with_score(
         input=user_query, k=5, pre_filter={"page": {"$eq": 1}}
     )
-    
+    template = """
+Use the following pieces of context to answer the question at the end.
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+{context}
+Question: {question}
+"""
+custom_rag_prompt = PromptTemplate.from_template(template)
+
+def format_docs(docs):
+   return "\n\n".join(doc.page_content for doc in docs)
+# Construct a chain to answer questions on your data
+rag_chain = (
+   { "context": retriever | format_docs, "question": RunnablePassthrough()}
+   | custom_rag_prompt
+   | llm
+   | StrOutputParser()
+)
     # Check if any results are found
+question = user_query
+response = rag_chain.invoke(question)
+print("Question: " + question)
+print("Answer: " + answer)
     if not response:
         return None
 
     return response
+
+documents = retriever.get_relevant_documents(question)
+print("\nSource documents:")
+pprint.pprint(documents)
 
 # Define topic lists
 language = "언어"
@@ -185,7 +221,10 @@ def create_quiz_retrieval_chain(pages):
     # Subtopics selection based on selected topics
     sub_topics = subtopic_select(selected_topics)
 
-    # Initialize LLM and embeddings
+    if text_content is not None:
+                if st.button('문제 생성 하기'):
+                    with st.spinner('퀴즈를 생성 중입니다...'):
+                            # Initialize LLM and embeddings
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
     embeddings = OpenAIEmbeddings()
 
