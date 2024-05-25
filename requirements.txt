@@ -23,11 +23,6 @@ numpy
 chromadb
 schema
 googletrans
-streamlit==1.35.0
-chromadb==0.5.0
-schema==0.7.7
-googletrans==3.0.0
-langchain
 pytesseract
 PyPDF2
 pymongo
