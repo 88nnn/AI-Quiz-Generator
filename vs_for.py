@@ -17,8 +17,8 @@ uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retr
 client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Load the PDF
-loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
-data = loader.load()
+#loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
+#data = loader.load()
 
 # Create MongoDB Atlas Vector Search instance
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
