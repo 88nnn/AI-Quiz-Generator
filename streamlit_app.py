@@ -113,9 +113,10 @@ def quiz_creation_page():
             text_content = loader.load()
     elif upload_option == "토픽 선택":
         topic = st.selectbox("토픽을 선택하세요", tc.topic_list())
-        subtopics = tc.subtopic_select(topic)
-        selected_subtopics = st.multiselect("세부 토픽을 선택하세요", subtopics)
-        text_content = " ".join(selected_subtopics)
+        if topic:
+            subtopics = tc.subtopic_select(topic)
+            selected_subtopics = st.multiselect("세부 토픽을 선택하세요", subtopics)
+            text_content = " ".join(selected_subtopics)
 
     if text_content:
         if st.button('문제 생성 하기'):
