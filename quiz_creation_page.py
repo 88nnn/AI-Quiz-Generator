@@ -443,7 +443,7 @@ def quiz_creation_page():
                         documents = text_splitter.split_documents(text_content)
                         vector = FAISS.from_documents(documents, embeddings)
 
-                        retriever_results(user_query)
+                        retrieve_results(user_query)
 
 
                         # PydanticOutputParser 생성
