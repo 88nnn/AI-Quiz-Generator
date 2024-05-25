@@ -23,3 +23,4 @@ numpy
 chromadb
 schema
 googletrans
+langchain_chains
