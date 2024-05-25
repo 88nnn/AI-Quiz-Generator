@@ -416,7 +416,7 @@ def quiz_creation_page():
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
-                   ("수학", "문학", "비문학", "과학"),
+                   ("수학", "문학", "비문학", "과학", "Action", "American"),
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
@@ -443,7 +443,7 @@ def quiz_creation_page():
                         documents = text_splitter.split_documents(text_content)
                         vector = FAISS.from_documents(documents, embeddings)
 
-                        retrieve_results(user_query)
+                        
 
 
                         # PydanticOutputParser 생성
@@ -469,8 +469,9 @@ def quiz_creation_page():
                         document_chaintf = create_stuff_documents_chain(llm, prompttf)
 
                         retriever = vector.as_retriever()
+                        user_query = topic
+                        retrieve_results(user_query)
 
-                        
 
                         retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
                         retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
