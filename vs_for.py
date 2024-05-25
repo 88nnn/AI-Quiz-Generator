@@ -3,7 +3,7 @@ from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
-from langchain.output_parsers import StrOutputParser
+from langchain.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
