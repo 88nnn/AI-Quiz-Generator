@@ -57,10 +57,6 @@ topic = [language, mathematic, social_science, natural_science,
 selected_topics = []
 
 
-def topic_select():
-    from quiz_creation_page import quiz_creation_page
-    return now_topic
-
 def topic_list():
     return topic
 
