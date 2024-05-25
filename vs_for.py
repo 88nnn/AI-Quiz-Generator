@@ -8,7 +8,36 @@ from langchain_core.runnables import RunnablePassthrough
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from googletrans import Translator
-import pprint
+
+from langchain_openai import ChatOpenAI
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain.prompts.prompt import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+from langchain import hub
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.document_loaders.image import UnstructuredImageLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from PIL import Image
+import pytesseract
+from PyPDF2 import PdfReader
+import io
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+import chardet
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain_openai import OpenAIEmbeddings
+from langchain.document_loaders import WebBaseLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from pymongo import MongoClient
+import pymongo
 
 # MongoDB URI
 uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
