@@ -1,13 +1,13 @@
 import streamlit as st
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
-from langchain.output_parsers import StrOutputParser
+from langchain.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from googletrans import Translator
+from langchain_core.pydantic_v1 import BaseModel, Field
 import pprint
 
 # MongoDB URI
@@ -15,10 +15,6 @@ uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retr
 
 # Create a new MongoDB client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
-
-# Load the PDF
-# loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
-# data = loader.load()
 
 # Create MongoDB Atlas Vector Search instance
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
@@ -33,6 +29,13 @@ llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
 # Initialize Google Translator
 translator = Translator()
+
+# Define the Pydantic model for the output parser
+class Answer(BaseModel):
+    answer: str
+
+# Initialize the output parser
+output_parser = PydanticOutputParser(pydantic_model=Answer)
 
 # Function to format documents into a single string
 def format_docs(docs):
@@ -52,7 +55,7 @@ rag_chain = (
     {"context": RunnablePassthrough() | format_docs, "question": RunnablePassthrough()}
     | custom_rag_prompt
     | llm
-    | StrOutputParser()
+    | output_parser
 )
 
 # Function to retrieve results from the vector search
@@ -82,10 +85,10 @@ def retrieve_results(user_query):
 
             # Display the question and the generated answer
             st.text(f"Question ({lang}): " + query)
-            st.text("Answer: " + response)
+            st.text("Answer: " + response['answer'])
 
             # Collect responses
-            responses.append((query, response))
+            responses.append((query, response['answer']))
 
     # Display the source documents for debugging purposes
     st.text("\nSource documents:")
