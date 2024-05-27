@@ -24,31 +24,10 @@ uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retr
 client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Database and collection references
-db = client["sample_mflix"]
-collection = db["embedded_movies"]
+db = client["db1"]
+collection = db["PythonDatascienceinterview"]
 
 # Load the PDF
-loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
-data = loader.load()
-
-# Create MongoDB Atlas Vector Search instance
-vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-    connection_string=uri,
-    namespace="langchain_db.test",
-    embedding=OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
-    index_name="vector_index_test"
-)
-
-query = "MongoDB Atlas security"
-results = vector_search.similarity_search_with_score(
-   query = query, k = 3
-)
-
-# Split PDF into documents
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
-docs = text_splitter.split_documents(data)
-# Print the first document
-docs[0]
 
 
 # Define Pydantic models for quiz creation
