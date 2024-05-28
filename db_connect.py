@@ -45,8 +45,7 @@ def quiz_creation_page():
                 connection_string = connection_string,
                 collection = "db1.PythonDatascienceinterview",
                 embeddings,
-                vector_index = "vector_index",
-            )
+                vector_index = "vector_index")
 
             docs = WikipediaLoader(query=topic, load_max_docs=3).load()
             db_collection = client[db1][PythonDatascienceinterview]
