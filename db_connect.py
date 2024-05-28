@@ -106,8 +106,8 @@ def quiz_creation_page():
             embeddings = get_embeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
                 connection_string,
-                collection_name,
-                embeddings,
+                atlas_collection,
+                solution,
                 vector_search_index
             )
 
