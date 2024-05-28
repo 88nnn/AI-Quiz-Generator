@@ -99,6 +99,7 @@ def quiz_creation_page():
            placeholder="토픽을 선택하세요",
         )
         
+
         if st.button('토픽에 따른 벡터 검색'):
             # MongoDB 연결 및 설정
             db_name = "db1"
@@ -126,6 +127,33 @@ def quiz_creation_page():
                 index_name=vector_search_index
             )
             st.write(vector_search.search_results())
+
+    if st.button('퀴즈 생성'):
+        # MongoDB 연결 및 설정
+        db_name = "db1"
+        collection_name = "PythonDatascienceinterview"
+        atlas_collection = client[db_name][collection_name]
+
+        # 토픽을 임베딩합니다.
+        topic_embedding = embeddings.embed_text(topic)
+
+        # MongoDB에서 벡터 검색을 수행합니다.
+        results = search_vectors(collection_name, topic_embedding)
+
+        quiz_questions = []
+        for doc in results:
+            quiz_questions.append({
+                "quiz": doc["quiz"],
+                "options1": doc["options1"],
+                "options2": doc["options2"],
+                "options3": doc["options3"],
+                "options4": doc["options4"],
+                "correct_answer": doc["correct_answer"]
+            })
+
+        st.success('퀴즈 생성이 완료되었습니다!')
+        st.write(quiz_questions)
+        st.session_state['quiz_created'] = True
 
     elif upload_option == "URL":
         url_area_content = st.text_area("URL을 입력하세요.")
@@ -176,6 +204,27 @@ def quiz_creation_page():
 
     elif topic is not None:
         st.warning("토픽을 선택하고 '토픽에 따른 벡터 검색' 버튼을 눌러주세요.")
+
+def search_vectors(collection_name, query_vector, top_k=10):
+    """
+    MongoDB에서 벡터 검색을 수행하는 함수
+    """
+    db = connect_db()
+    collection = db[collection_name]
+    results = collection.aggregate([
+        {
+            '$search': {
+                'vector': {
+                    'query': query_vector,
+                    'path': 'vector',
+                    'cosineSimilarity': True,
+                    'topK': top_k
+                }
+            }
+        }
+    ])
+
+    return list(results)
 
 
 def quiz_page():
