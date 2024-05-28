@@ -55,7 +55,7 @@ def quiz_creation_page():
                 documents=documents,
                 embedding=embeddings,
                 collection=db_collection,
-                index_name="vector_index",
+                index_name="vector_index"
             )
             st.write(vector_search.search_results())
 
