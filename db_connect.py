@@ -110,7 +110,7 @@ def quiz_creation_page():
         if st.button('퀴즈 생성'):
             # MongoDB 연결 및 설정
             db_name = "db1"
-            collection_name = "PythonDatascienceinterview"
+            collection_name = "db1.PythonDatascienceinterview"
             atlas_collection = client[db_name][collection_name]
             vector_search_index = "vector_index"
 
