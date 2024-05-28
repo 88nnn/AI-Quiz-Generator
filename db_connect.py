@@ -1,22 +1,17 @@
 import streamlit as st
-from PIL import Image
-from PyPDF2 import PdfReader
-import io
 from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import create_retrieval_chain
-from langchain.output_parsers import PydanticOutputParser
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from pymongo import MongoClient
-
-
-
 
 # MongoDB 연결
 client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 connection_string = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+@st.cache(allow_output_mutation=True)
+def get_embeddings():
+    return OpenAIEmbeddings()
 
 def quiz_creation_page():
     """
@@ -39,33 +34,25 @@ def quiz_creation_page():
            index=None,
            placeholder="토픽을 선택하세요",
         )
-        
 
         if st.button('토픽에 따른 벡터 검색'):
-            # MongoDB 연결 및 설정
-            db_name = "db1"
-            collection_name = "PythonDatascienceinterview"
-            atlas_collection = client[db_name][collection_name]
-            vector_search_index = "vector_index"
-
-            # 벡터 검색기 생성
-            embeddings = OpenAIEmbeddings()
+            # 토픽에 따른 벡터 검색 결과 출력
+            embeddings = get_embeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
-                connection_string,  # 수정된 부분
-                collection_name,
+                connection_string,
+                "PythonDatascienceinterview",
                 embeddings,
-                vector_search_index
+                "vector_index"
             )
 
-            # 토픽에 따른 벡터 검색 결과 출력
             docs = WikipediaLoader(query=topic, load_max_docs=3).load()
             text_splitter = RecursiveCharacterTextSplitter()
             documents = text_splitter.split_documents(docs)
             vector_search = MongoDBAtlasVectorSearch.from_documents(
                 documents=documents,
                 embedding=embeddings,
-                collection=atlas_collection,
-                index_name=vector_search_index
+                collection=client.db1.PythonDatascienceinterview,
+                index_name="vector_index"
             )
             st.write(vector_search.search_results())
 
@@ -76,6 +63,7 @@ def quiz_creation_page():
         atlas_collection = client[db_name][collection_name]
 
         # 토픽을 임베딩합니다.
+        embeddings = get_embeddings()
         topic_embedding = embeddings.embed_text(topic)
 
         # MongoDB에서 벡터 검색을 수행합니다.
@@ -110,12 +98,12 @@ def quiz_creation_page():
         if st.button('퀴즈 생성'):
             # MongoDB 연결 및 설정
             db_name = "db1"
-            collection_name = "db1.PythonDatascienceinterview"
+            collection_name = "PythonDatascienceinterview"
             atlas_collection = client[db_name][collection_name]
             vector_search_index = "vector_index"
 
             # 벡터 검색기 생성
-            embeddings = OpenAIEmbeddings()
+            embeddings = get_embeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
                 connection_string,
                 collection_name,
@@ -150,8 +138,7 @@ def search_vectors(collection_name, query_vector, top_k=10):
     """
     MongoDB에서 벡터 검색을 수행하는 함수
     """
-    db = connect_db()
-    collection = db[collection_name]
+    collection = client.db1[collection_name]
     results = collection.aggregate([
         {
             '$search': {
