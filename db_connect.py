@@ -5,6 +5,9 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from pymongo import MongoClient
 
+export OPENAI_API_KEY="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"
+
+
 # MongoDB 연결
 client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 connection_string = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
