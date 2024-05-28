@@ -77,24 +77,6 @@ def generate_quiz(quiz_type, is_topic, retriever_chain):
     return quiz_questions
 
 
-def grade_quiz_answer(user_answer, quiz_answer):
-    """
-    퀴즈 답변을 평가하는 함수
-
-    Args:
-        user_answer (str): 사용자 답변
-        quiz_answer (str): 정답
-
-    Returns:
-        str: 평가 결과
-    """
-    if user_answer.lower() == quiz_answer.lower():
-        grade = "정답"
-    else:
-        grade = "오답"
-    return grade
-
-
 def quiz_creation_page():
     """
     퀴즈 생성 페이지를 렌더링하는 함수
@@ -116,51 +98,84 @@ def quiz_creation_page():
            index=None,
            placeholder="토픽을 선택하세요",
         )
+        
+        if st.button('토픽에 따른 벡터 검색'):
+            # MongoDB 연결 및 설정
+            db_name = "db1"
+            collection_name = "PythonDatascienceinterview"
+            atlas_collection = client[db_name][collection_name]
+            vector_search_index = "vector_index"
+
+            # 벡터 검색기 생성
+            embeddings = OpenAIEmbeddings()
+            retriever = MongoDBAtlasVectorSearch.from_connection_string(
+                "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+                collection_name,
+                embeddings,
+                vector_search_index
+            )
+
+            # 토픽에 따른 벡터 검색 결과 출력
+            docs = WikipediaLoader(query=topic, load_max_docs=3).load()
+            text_splitter = RecursiveCharacterTextSplitter()
+            documents = text_splitter.split_documents(docs)
+            vector_search = MongoDBAtlasVectorSearch.from_documents(
+                documents=documents,
+                embedding=embeddings,
+                collection=atlas_collection,
+                index_name=vector_search_index
+            )
+            st.write(vector_search.search_results())
+
     elif upload_option == "URL":
         url_area_content = st.text_area("URL을 입력하세요.")
         loader = RecursiveUrlLoader(url=url_area_content)
         text_content = loader.load()
+
     else:
-        uploaded_file = st.file_uploader(f"{upload_option} 파일을 업로드하세요.", type=[upload_option.lower()])
+        uploaded_file = st.file_uploader("파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
+        if uploaded_file:
+            text_content = process_file(uploaded_file, upload_option)
 
-    quiz_questions = []
+    if text_content is not None or (topic is not None and upload_option == "토픽 선택"):
+        if st.button('퀴즈 생성'):
+            # MongoDB 연결 및 설정
+            db_name = "db1"
+            collection_name = "PythonDatascienceinterview"
+            atlas_collection = client[db_name][collection_name]
+            vector_search_index = "vector_index"
 
-    if text_content is not None or uploaded_file is not None:
-        if st.button('문제 생성 하기'):
-            with st.spinner('퀴즈를 생성 중입니다...'):
-                llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
-                embeddings = OpenAIEmbeddings()
+            # 벡터 검색기 생성
+            embeddings = OpenAIEmbeddings()
+            retriever = MongoDBAtlasVectorSearch.from_connection_string(
+                "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+                collection_name,
+                embeddings,
+                vector_search_index
+            )
 
-                # MongoDB 연결 및 설정
-                db_name = "db1"
-                collection_name = "PythonDatascienceinterview"
-                atlas_collection = client[db_name][collection_name]
-                vector_search_index = "vector_index"
+            # 텍스트 검색 및 퀴즈 생성 체인 설정
+            retriever_chain = create_retrieval_chain(retriever)
 
-                retriever = MongoDBAtlasVectorSearch.from_documents(
-                    documents=text_content if upload_option != "토픽 선택" else WikipediaLoader(query=topic, load_max_docs=3).load(),
-                    embedding=embeddings,
-                    collection=atlas_collection,
-                    index_name=vector_search_index
+            # 토픽 선택 여부에 따라 퀴즈 생성
+            is_topic = topic if upload_option == "토픽 선택" else None
+
+            quiz_questions = []
+            for _ in range(num_quizzes):
+                quiz_questions.append(
+                    generate_quiz(
+                        quiz_type,
+                        is_topic,
+                        retriever_chain
+                    )
                 )
 
-                retriever_chain = create_retrieval_chain(retriever)
+            st.success('퀴즈 생성이 완료되었습니다!')
+            st.write(quiz_questions)
+            st.session_state['quiz_created'] = True
 
-                for i in range(num_quizzes):
-                    quiz_questions.append(
-                        generate_quiz(
-                            quiz_type,
-                            topic if upload_option == "토픽 선택" else None,
-                            retriever_chain
-                        )
-                    )
-                st.success('퀴즈 생성이 완료되었습니다!')
-                st.write(quiz_questions)
-                st.session_state['quiz_created'] = True
-
-    if st.session_state.get('quiz_created', False):
-        if st.button('퀴즈 풀기'):
-            st.session_state.page = 1
+    elif topic is not None:
+        st.warning("토픽을 선택하고 '토픽에 따른 벡터 검색' 버튼을 눌러주세요.")
 
 
 def quiz_page():
