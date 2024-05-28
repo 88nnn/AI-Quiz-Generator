@@ -266,5 +266,3 @@ def quiz_creation_page():
     st.title("Quiz Creation Page")
     create_quiz_retrieval_chain(pages=None)
 
-if __name__ == "__main__":
-    quiz_creation_page()
