@@ -83,7 +83,7 @@ def quiz_creation_page():
         st.success('퀴즈 생성이 완료되었습니다!')
         st.write(quiz_questions)
         st.session_state['quiz_created'] = True
-
+"""
     elif upload_option == "URL":
         url_area_content = st.text_area("URL을 입력하세요.")
         loader = RecursiveUrlLoader(url=url_area_content)
@@ -92,8 +92,8 @@ def quiz_creation_page():
     else:
         uploaded_file = st.file_uploader("파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
         if uploaded_file:
-            text_content = process_file(uploaded_file, upload_option)
-
+            text_content = process_file(uploaded_file, upload_option)"""
+"""
     if text_content is not None or (topic is not None and upload_option == "토픽 선택"):
         if st.button('퀴즈 생성'):
             # MongoDB 연결 및 설정
@@ -133,7 +133,7 @@ def quiz_creation_page():
 
     elif topic is not None:
         st.warning("토픽을 선택하고 '토픽에 따른 벡터 검색' 버튼을 눌러주세요.")
-
+"""
 def search_vectors(collection_name, query_vector, top_k=10):
     """
     MongoDB에서 벡터 검색을 수행하는 함수
