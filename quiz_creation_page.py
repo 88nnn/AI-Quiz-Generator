@@ -422,7 +422,7 @@ def quiz_creation_page():
             if upload_option == "토픽 선택":
                 topic = st.selectbox(
                    "토픽을 선택하세요",
-                   ("수학", "문학", "비문학", "과학", "test", "langchain", "vector_index"),
+                   ("수학", "문학", "비문학", "과학", "test", "langchain", "vector_index", "python"),
                    index=None,
                    placeholder="토픽을 선택하세요",
                 ) 
@@ -452,8 +452,8 @@ def quiz_creation_page():
                         vector_search = MongoDBAtlasVectorSearch.from_documents(
                             documents=documents,
                             embedding=embeddings,
-                            collection=atlas_collection,
-                            index_name=vector_search_index
+                            collection=PythonDatascienceinterview,
+                            index_name="vector_index"
                         )
 
                         # Instantiate Atlas Vector Search as a retriever
