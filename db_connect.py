@@ -45,7 +45,7 @@ def quiz_creation_page():
                 connection_string,
                 "db1.PythonDatascienceinterview",
                 embeddings,
-                "vector_index"
+                "vector_index",
             )
 
             docs = WikipediaLoader(query=topic, load_max_docs=3).load()
@@ -56,7 +56,7 @@ def quiz_creation_page():
                 documents=documents,
                 embedding=embeddings,
                 collection=db_collection,
-                index_name="vector_index"
+                index_name="vector_index",
             )
             st.write(vector_search.search_results())
 
@@ -112,7 +112,7 @@ def quiz_creation_page():
                 connection_string,
                 atlas_collection,
                 solution,
-                vector_search_index
+                vector_search_index,
             )
 
             # 텍스트 검색 및 퀴즈 생성 체인 설정
@@ -127,7 +127,7 @@ def quiz_creation_page():
                     generate_quiz(
                         quiz_type,
                         is_topic,
-                        retriever_chain
+                        retriever_chain,
                     )
                 )
 
@@ -150,7 +150,7 @@ def search_vectors(collection_name, query_vector, top_k=10):
                     'query': query_vector,
                     'path': 'vector',
                     'cosineSimilarity': True,
-                    'topK': top_k
+                    'topK': top_k,
                 }
             }
         }
