@@ -37,13 +37,6 @@ class CreateQuizMC(BaseModel, ans):
     options2: str = Field(description="The second option of the created problem")
     options3: str = Field(description="The third option of the created problem")
     options4: str = Field(description="The fourth option of the created problem")
-        if ans == 1:
-            correct_answer: str = Field(description="One of the options1 or options2 or options3 or options4")
-            if ans == 2:
-                correct_answer: str = Field(description="Two of the options1 or options2 or options3 or options4")
-                if ans == 3:
-                    correct_answer: str = Field(description="Three of the options1 or options2 or options3 or options4")
-
 
 class CreateQuizSubj(BaseModel):
     quiz = ("quiz =The created problem")
@@ -165,10 +158,6 @@ def create_quiz_retrieval_chain(pages):
 
     # 퀴즈 개수 선택
     num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=3, step=1)
-
-    #정답 개수 선택
-    ans = st.slider("생성할 퀴즈의 정답수를 입력하세요. 정답은 한 개 이상입니다:", min_value=1, value=1, step=1, max_value=3)
-    st.text('제가 선택한 정답 개수는 {} 입니다.'.format(ans))
     
     # 입력 유형 선택
     upload_option = st.radio("입력 유형을 선택하세요", ("직접 입력", "PDF 파일", "토픽 선택"))
