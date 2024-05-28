@@ -10,8 +10,8 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pymongo, pprint
-import langchain-mongodb
-import langchain-openai
+import langchain_mongodb
+import langchain_openai
 from langchain_core.runnables import RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pymongo.server_api import ServerApi
