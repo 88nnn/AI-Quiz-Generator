@@ -37,11 +37,11 @@ class CreateQuizMC(BaseModel, ans):
     options2: str = Field(description="The second option of the created problem")
     options3: str = Field(description="The third option of the created problem")
     options4: str = Field(description="The fourth option of the created problem")
-        if ans = 1:
+        if ans == 1:
             correct_answer: str = Field(description="One of the options1 or options2 or options3 or options4")
-            if ans = 2:
+            if ans == 2:
                 correct_answer: str = Field(description="Two of the options1 or options2 or options3 or options4")
-                if ans = 3:
+                if ans == 3:
                     correct_answer: str = Field(description="Three of the options1 or options2 or options3 or options4")
 
 
