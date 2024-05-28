@@ -42,10 +42,10 @@ def quiz_creation_page():
             # 토픽에 따른 벡터 검색 결과 출력
             embeddings = get_embeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
-                connection_string,
-                "db1.PythonDatascienceinterview",
+                connection_string = connection_string,
+                collection = "db1.PythonDatascienceinterview",
                 embeddings,
-                "vector_index",
+                vector_index = "vector_index",
             )
 
             docs = WikipediaLoader(query=topic, load_max_docs=3).load()
