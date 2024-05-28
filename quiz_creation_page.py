@@ -70,13 +70,13 @@ def vectorize_and_store(data, collection_name):
         vector_operations.append(operation)
 
     db = connect_db()
-    collection = db[test]
+    collection = db[PythonDatascienceinterview]
     collection.bulk_write(vector_operations)
 
 
 def search_vectors(collection_name, query_vector, top_k=10):
     db = connect_db()
-    collection = db[test]
+    collection = db[PythonDatascienceinterview]
     results = collection.aggregate([
         {
             '$search': {
@@ -100,7 +100,7 @@ def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
     vector_search = MongoDBAtlasVectorSearch.from_connection_string(
         "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
-        "langchain_db.test",
+        "db1.PythonDatascienceinterview",
         OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
         index_name="vector_index"
     )
