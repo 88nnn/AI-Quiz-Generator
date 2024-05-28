@@ -1,257 +1,618 @@
+#quiz_creation_page.py
 
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.chains import create_retrieval_chain
-from langchain.prompts import PromptTemplate
-from langchain.output_parsers import PydanticOutputParser
+import streamlit as st
+from langchain_openai import ChatOpenAI
 from langchain_core.pydantic_v1 import BaseModel, Field
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from langchain.prompts.prompt import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+from langchain import hub
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.document_loaders.image import UnstructuredImageLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import pymongo, pprint
-import langchain_mongodb
-import langchain_openai
-from langchain_core.runnables import RunnablePassthrough
+from langchain_community.vectorstores import FAISS
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from PIL import Image
+import pytesseract
+from PyPDF2 import PdfReader
+import io
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+import chardet
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain_openai import OpenAIEmbeddings
+from langchain.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pymongo.server_api import ServerApi
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from pymongo import MongoClient
+import pymongo
+from langchain_community.document_loaders import WikipediaLoader
 
+#아이디는 코드에 들어가진 않습니다.
+#embedings 항목에 array 형식으로 저장된 벡터 값으로 벡터 검색이 되고 atlas vextet index 항목에서 검색기로 등록해주면 검색 가능하다고 합니다. 
+#acm41th:vCcYRo8b4hsWJkUj@cluster0 여기까지가 아이디:비밀번호:클러스터 주소라 필수적입니다. 마지막 앱네임도 클러스터명
 
-# MongoDB URI
-uri = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+#Vectorstore
+client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+#client['your_database_name']이 데베 이름입니다. 데베1은 파이썬 관련 정보가 용량이 적길래 일단 넣어줬습니다.
+#임베딩 항목은 따로 처리해서 넣어줘야 할 겁니다.
+#랭체인도 데모 데이터로 몽고디비 관련 내용이고 엠플릭스도 영화 관련 데모 데이터입니다.
+#콜렉션은 각 디비 안에 있는 데이터셋을 뜻합니다. 디비가 폴더고 얘가 파일 같습니다.
+#임베딩값이 들어 있는 콜렉션은 일단 embeded_movies랑 test가 있습니다. 각각 sample_mflix.embedded_movies
+#, langchain_db.test처럼 넣어서 쓰면 됩니다.
 
-# Create a new MongoDB client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
+def connect_db():
+    client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    return client[db1]
 
-# Database and collection references
-db = client["db1"]
-collection = db["PythonDatascienceinterview"]
+def insert_documents(collection_name, documents):
+    db = connect_db()
+    collection = db[PythonDatascienceinterview]
+    collection.insert_many(documents)
 
-# Load the PDF
+def vectorize_and_store(data, collection_name):
+    embeddings = OpenAIEmbeddings()
+    vector_operations = []
 
+    for document in data:
+        text = document['text']
+        vector = embeddings.embed_text(text)
+        operation = UpdateOne({'_id': document['_id']}, {'$set': {'vector': vector.tolist()}})
+        vector_operations.append(operation)
 
-# Define Pydantic models for quiz creation
-class CreateQuizMC(BaseModel, ans):
-    quiz: str = Field(description="The created problem")
-    options1: str = Field(description="The first option of the created problem")
-    options2: str = Field(description="The second option of the created problem")
-    options3: str = Field(description="The third option of the created problem")
-    options4: str = Field(description="The fourth option of the created problem")
+    db = connect_db()
+    collection = db[PythonDatascienceinterview]
+    collection.bulk_write(vector_operations)
 
-class CreateQuizSubj(BaseModel):
-    quiz = ("quiz =The created problem")
-    correct_answer = ("correct_answer =The answer to the problem")
+def search_vectors(collection_name, query_vector, top_k=10):
+    db = connect_db()
+    collection = db[PythonDatascienceinterview]
+    results = collection.aggregate([
+        {
+            '$search': {
+                'vector': {
+                    'query': query_vector,
+                    'path': 'vector',
+                    'cosineSimilarity': True,
+                    'topK': top_k
+                }
+            }
+        }
+    ])
 
-class CreateQuizTF(BaseModel):
-    quiz: str = Field(description="The created problem")
-    options1: str = Field(description="True option")
-    options2: str = Field(description="False option")
-    correct_answer: str = Field(description="The correct answer")
+    #st.write("Question: " + query_vector)
+    #st.write("Answer: " + results)
+    
+    return list(results)
 
-# Function to retrieve results from the vector search
 def retrieve_results(user_query):
+    # Create MongoDB Atlas Vector Search instance
+    vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+        "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
+        "db1.PythonDatascienceinterview",
+        OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
+        index_name="vector_index"
+    )
+
     # Perform vector search based on user input
     response = vector_search.similarity_search_with_score(
         input=user_query, k=5, pre_filter={"page": {"$eq": 1}}
     )
-    template = """
-Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-{context}
-Question: {question}
-"""
-custom_rag_prompt = PromptTemplate.from_template(template)
 
-def format_docs(docs):
-   return "\n\n".join(doc.page_content for doc in docs)
-# Construct a chain to answer questions on your data
-rag_chain = (
-   { "context": retriever | format_docs, "question": RunnablePassthrough()}
-   | custom_rag_prompt
-   | llm
-   | StrOutputParser()
-)
+    st.write("Question: " + user_query)
+    st.write("Answer: " + response)
+
     # Check if any results are found
-question = user_query
-response = rag_chain.invoke(question)
-print("Question: " + question)
-print("Answer: " + answer)
     if not response:
         return None
 
     return response
 
-documents = retriever.get_relevant_documents(question)
-print("\nSource documents:")
-pprint.pprint(documents)
 
-# Define topic lists
-language = "언어"
-english = "영어"
-korean = "한국어"
-language_topic = [english, korean]
+examples = [
+    {
+        "Question": "Create one multiple-choice question focusing on important concepts, following the given format, referring to the following context, Please answer in KOREAN.",
 
-mathematic = "수리"
-algebra = "대수학"
-geometry = "기하학"
-calculus = "미적분학"
-statistics = "통계학"
-mathematic_topic = [algebra, geometry, calculus, statistics]
+        "CONTEXT": """
+        {context}
+        """,
 
-social_science = "사회과학"
-psychology = "심리학"
-sociology = "사회학"
-economics = "경제학"
-political_science = "정치학"
-social_science_topic = [psychology, sociology, economics, political_science]
+        "FORMAT": """
+        {
+            plusQA: str = Field(description="The plus question and answer")
+            quiz: str = Field(description="The created problem")
+            options1: str = Field(description="The first option of the created problem")
+            options2: str = Field(description="The second option of the created problem")
+            options3: str = Field(description="The third option of the created problem")
+            options4: str = Field(description="The fourth option of the created problem")
+            correct_answer: str = Field(description="One of the options1 or options2 or options3 or options4")
+        }
+        """,
 
-natural_science = "자연과학"
-physics = "물리학"
-chemistry = "화학"
-biology = "생물학"
-astronomy = "천문학"
-natural_science_topic = [physics, chemistry, biology, astronomy]
+        "answer": """
+{"plusQA": "추가 질문: 이 자료는 수학, 문학, 비문학, 과학 중 어느 종류야? 
+중간 답변: 이 자료는 수학, 분야는 미적분입니다.
+추가 질문: 미적분에 관한 format에 맞는 다양한 multiple-choice 문제를 생성합니다.", "quiz": "실수 전체의 집합에서 연속인 함수 f{\left(x \\right)}\가 모든 실수 x 대하여 f{\left(x \\right)}\ ≥ 0이고, x < 0일 때 f{\left(x \\right)}\ = (-x)*($e$^((x)^))이다.
+모든 양수 t에 대하여 x에 대한 방정식 f{\letf(x \\right)}\ = t의 서로 다른
+실근의 개수는 2이고, 이 방정식의 두 실근 중 작은 값을 g{\left(t \\right)}\,
+큰 값을 h{\left(t \\right)}\라 하자.
+두 함수 g{\left(t \\right)}\, h{\left(t \\right)}\는 모든 양수 t에 대하여
+2g{\left(t \\right)}\ + h{\left(t \\right)}\ = k (k는 상수)
+를 만족시킨다. \int\limits_{0}^{7} f{\left(x \\right)}\, dx = $e$() - 1일 때,f{\left(9 \\right)}\/{\left(8 \\right)}\ 의 값은?",
+"options1": "1.) \\frac{3}{2}*$e$^5",
+"options2": "2.) \\frac{4}{3}*$e$^7",
+"options3": "3.) \\frac{5}{4}*$e$^9",
+"options4": "4.) \\frac{6}{5}*$e$^11",
+"correct_answer": "options4"}
+""",
+    },
+    {
+        "Question": "Create one open-ended question focusing on important concepts, following the given format, referring to the following context",
 
-humanity = "인문학"
-philosophy = "철학"
-history = "역사학"
-literature = "문학"
-art_history = "미술사"
-humanity_topic = [philosophy, history, literature, art_history]
+        "CONTEXT": """
+        {context}
+        """,
 
-engineering = "공학"
-computer_engineering = "컴퓨터 공학"
-architectural_engineering = "건축공학"
-engineering_topic = [computer_engineering, architectural_engineering]
+        "FORMAT": """
+        {
+            plusQA: str = Field(description="The plus question and answer")
+            quiz: str = Field(description="The created problem")
+            correct_answer: str = Field(description="correct_answer =The answer to the problem")
+        }
+        """,
 
-art = "예술"
-film = "영화"
-novel = "소설"
-art_topic = [film, novel]
+        "answer": """
+{"plusQA": "추가 질문: 이 자료는 수학, 문학, 비문학, 과학 중 어느 종류야?
+중간 답변: 이 자료는 수학, 분야는 기하 입니다.
+추가 질문: 미적분에 관한 format에 맞는 다양한 open-ended 문제를 생성합니다.",
+"quiz": "좌표평면에 한 변의 길이가 4인 정삼각형 ABC가 있다. 선분 AB를 1 : 3으로 내분하는 점을 D , 선분 BC를 1 : 3으로 내분하는 점을 E, 선분 CA 를 1 : 3으로 내분하는 점을 F라 하자. 네 점 P , Q , R, X가 다음 조건을 만족시킨다. \"(가)  \left|\overset{\\rightarrow}{DP}\\right| = \left|\overset{\\rightarrow}{EQ}\\right = \left\overset{\\rightarrow}{FR}\\right = 1\" \"(나) \overset{\\rightarrow}{AX} = \overset{\\rightarrow}{PB} + \overset{\\rightarrow}{QC} + \overset{\\rightarrow}{RA}\" |[A,X]| 의 값이 최대일 때, 삼각형 PQR의 넓이를 S라 하자. 16S^2 의 값을 구하시오,
+"correct_answer": "147"}
+""",
+    },
+    {
+        "Question": "Create one true or false question focusing on important concepts, following the given format, referring to the following context",
 
-topic = [language, mathematic, social_science, natural_science, humanity, engineering, art]
+        "CONTEXT": """
+        {context}
+        """,
 
-# Function to select subtopics
-def subtopic_select(selected_topics):
-    sub_topics = []
-    for topic in selected_topics:
-        if topic == language:
-            sub_topics.extend(language_topic)
-        elif topic == mathematic:
-            sub_topics.extend(mathematic_topic)
-        elif topic == social_science:
-            sub_topics.extend(social_science_topic)
-        elif topic == natural_science:
-            sub_topics.extend(natural_science_topic)
-        elif topic == humanity:
-            sub_topics.extend(humanity_topic)
-        elif topic == engineering:
-            sub_topics.extend(engineering_topic)
-        elif topic == art:
-            sub_topics.extend(art_topic)
-    return sub_topics
+        "FORMAT": """
+        {
+            plusQA: str = Field(description="The plus question and answer")
+            quiz: str = Field(description="The created problem")
+            options1: str = Field(description="The true or false option of the created problem")
+            options2: str = Field(description="The true or false option of the created problem")
+            correct_answer: str = Field(description="One of the options1 or options2")
+        }
+        """,
 
-# Function to create a quiz retrieval chain
-def create_quiz_retrieval_chain(pages):
-    # 퀴즈 유형 선택
-    quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"])
+        "answer": """
+{"plusQA": "추가 질문: 이 자료는 수학, 문학, 비문학, 과학 중 어느 종류야?
+중간 답변: 이 자료는 수학, 분야는 다항식입니다.
+추가 질문: 미적분에 관한 format에 맞는 다양한 true or false 문제를 생성합니다.",
+"quiz": " 다항식의 덧셈이나 뺄셈을 계산할 때에는 계수가 같은 문자의 차수를 더하거나 뺀 후 정리하면 된다. 이 문장은 참인가 거짓인가?",
+"options1": "1.) 참",
+"options2": "2.) 거짓",
+"correct_answer": "options2"}
+""",
+    },
+]
 
-    # 퀴즈 개수 선택
-    num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=3, step=1)
-    
-    # 입력 유형 선택
-    upload_option = st.radio("입력 유형을 선택하세요", ("직접 입력", "PDF 파일", "토픽 선택"))
-    st.header("파일 업로드")
-    
-    uploaded_file = None
-    text_content = None
-    topic = None
-    
-    uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
-    
-    if upload_option == "직접 입력":
-        text_input = st.text_area("텍스트를 입력하세요.")
-        st.write(text_input)
-        try:
-            text_content = text_input.encode("utf-8")
-        except UnicodeDecodeError:
-            return None
-    
-    selected_topics = []
-    if upload_option == "토픽 선택":
-        selected_topics = st.multiselect(
-            "토픽을 선택하세요",
-            topic,
-            index=None,
-            placeholder="토픽을 선택하세요",
-        )
-    
-    # Subtopics selection based on selected topics
-    sub_topics = subtopic_select(selected_topics)
+class CreateQuizoub(BaseModel):
+    quiz: str = Field(description="The created problem")
+    options1: str = Field(description="The first option of the created problem")
+    options2: str = Field(description="The second option of the created problem")
+    options3: str = Field(description="The third option of the created problem")
+    options4: str = Field(description="The fourth option of the created problem")
+    correct_answer: str = Field(description="One of the options1 or options2 or options3 or options4")
 
-    if text_content is not None:
-                if st.button('문제 생성 하기'):
-                    with st.spinner('퀴즈를 생성 중입니다...'):
-                            # Initialize LLM and embeddings
+class CreateQuizsub(BaseModel):
+    quiz = ("quiz =The created problem")
+    correct_answer = ("correct_answer =The answer to the problem")
+
+class CreateQuizTF(BaseModel):
+    quiz = ("The created problem")
+    options1 = ("The true or false option of the created problem")
+    options2 = ("The true or false option of the created problem")
+    correct_answer = ("One of the options1 or options2")
+
+def make_model(pages):
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
     embeddings = OpenAIEmbeddings()
 
-    # Text splitter and document processing
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
-    documents = text_splitter.split_documents(data)
+    # Rag
+    text_splitter = RecursiveCharacterTextSplitter()
+    documents = text_splitter.split_documents(pages)
     vector = FAISS.from_documents(documents, embeddings)
 
-    # Create PydanticOutputParser instances
-    parser_mc = PydanticOutputParser(pydantic_object=CreateQuizMC)
-    parser_subj = PydanticOutputParser(pydantic_object=CreateQuizSubj)
-    parser_tf = PydanticOutputParser(pydantic_object=CreateQuizTF)
+    # PydanticOutputParser 생성
+    parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
+    parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
+    parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
 
-    # Create prompt templates
-    prompt_template = PromptTemplate.from_template(
+    prompt = PromptTemplate.from_template(
         "Question: {input}, Please answer in KOREAN."
+
         "CONTEXT:"
         "{context}."
+
         "FORMAT:"
         "{format}"
     )
+    promptoub = prompt.partial(format=parseroub.get_format_instructions())
+    promptsub = prompt.partial(format=parsersub.get_format_instructions())
+    prompttf = prompt.partial(format=parsertf.get_format_instructions())
 
-    # Create partial prompts for different quiz types
-    prompt_mc = prompt_template.partial(format=parser_mc.get_format_instructions())
-    prompt_subj = prompt_template.partial(format=parser_subj.get_format_instructions())
-    prompt_tf = prompt_template.partial(format=parser_tf.get_format_instructions())
+    document_chainoub = create_stuff_documents_chain(llm, promptoub)
+    document_chainsub = create_stuff_documents_chain(llm, promptsub)
+    document_chaintf = create_stuff_documents_chain(llm, prompttf)
 
-    # Create document chains
-    document_chain_mc = create_stuff_documents_chain(llm, prompt_mc)
-    document_chain_subj = create_stuff_documents_chain(llm, prompt_subj)
-    document_chain_tf = create_stuff_documents_chain(llm, prompt_tf)
-
-    # Create retriever and retrieval chains
     retriever = vector.as_retriever()
 
-    retrieval_chain_mc = create_retrieval_chain(retriever, document_chain_mc)
-    retrieval_chain_subj = create_retrieval_chain(retriever, document_chain_subj)
-    retrieval_chain_tf = create_retrieval_chain(retriever, document_chain_tf)
+    retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
+    retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
+    retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
 
-    quiz_questions = []
-    for i in range(num_quizzes):
-        if quiz_type == "다중 선택 (객관식)":
-            quiz_questions.append(retrieval_chain_mc.run(input=text_content))
-        elif quiz_type == "주관식":
-            quiz_questions.append(retrieval_chain_subj.run(input=text_content))
-        elif quiz_type == "OX 퀴즈":
-            quiz_questions.append(retrieval_chain_tf.run(input=text_content))
+    # chainoub = promptoub | chat_model | parseroub
+    # chainsub = promptsub | chat_model | parsersub
+    # chaintf = prompttf | chat_model | parsertf
+    return 0
+
+
+def process_text(text_area_content):
+    text_content = st.text_area("텍스트를 입력하세요.")
+
+    return text_content
+
+# 파일 처리 함수
+def process_file(uploaded_file, upload_option):
+
+    uploaded_file = None
+    text_area_content = None
+    url_area_content = None
+    selected_topic = None
     
-    st.session_state['quizs'] = quiz_questions
-    st.session_state.selected_page = "퀴즈 풀이"
-    st.session_state.selected_type = quiz_type
-    st.session_state.selected_num = num_quizzes
+    # # 파일 업로드 옵션 선택
+    # upload_option = st.radio("입력 유형을 선택하세요", ("이미지 파일", "PDF 파일", "직접 입력", "URL", "토픽 선택"))
 
-    st.success('퀴즈 생성이 완료되었습니다!')
-    st.write(quiz_questions)
-    st.session_state['quiz_created'] = True
+    # 선택된 옵션에 따라 입력 방식 제공
+    if upload_option == "텍스트 파일":
+        uploaded_file = st.file_uploader("텍스트 파일을 업로드하세요.", type=["txt"])
+    elif upload_option == "이미지 파일":
+        uploaded_file = st.file_uploader("이미지 파일을 업로드하세요.", type=["jpg", "jpeg", "png"])
+    elif upload_option == "PDF 파일":
+        uploaded_file = st.file_uploader("PDF 파일을 업로드하세요.", type=["pdf"])
+    else:
+        uploaded_file = None
 
-# Main function to create the quiz creation page
+    # 업로드된 파일 처리
+    if uploaded_file is None:
+        st.warning("파일을 업로드하세요.")
+        return None
+
+    if uploaded_file.type == "text/plain":
+        text_content = uploaded_file.read().decode("utf-8")
+    elif uploaded_file.type.startswith("image/"):
+        image = Image.open(uploaded_file)
+        text_content = pytesseract.image_to_string(image)
+    elif uploaded_file.type == "application/pdf":
+        pdf_reader = PdfReader(io.BytesIO(uploaded_file.read()))
+        text_content = ""
+        for page in pdf_reader.pages:
+            text_content += page.extract_text()
+    else:
+        st.error("지원하지 않는 파일 형식입니다.")
+        return None
+        
+    text_splitter = RecursiveCharacterTextSplitter(
+        # Set a really small chunk size, just to show.
+        chunk_size=100,
+        chunk_overlap=20,
+        length_function=len,
+        is_separator_regex=False,
+    )
+    if text_area_content is not None:
+        text_content = process_file(uploaded_file, text_area_content) #?
+    texts = text_splitter.create_documents([text_content])
+    
+    return texts
+    
+
+# 퀴즈 생성 함수
+@st.experimental_fragment
+def generate_quiz(quiz_type, is_topic, retrieval_chainoub, retrieval_chainsub, retrieval_chaintf):
+    # Generate quiz prompt based on selected quiz type
+    if is_topic == None:
+        if quiz_type == "다중 선택 (객관식)":
+            response = retrieval_chainoub.invoke(
+                {
+                    "input": "Create one multiple-choice question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        elif quiz_type == "주관식":
+            response = retrieval_chainsub.invoke(
+                {
+                    "input": "Create one open-ended question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        elif quiz_type == "OX 퀴즈":
+            response = retrieval_chaintf.invoke(
+                {
+                    "input": "Create one true or false question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        quiz_questions = response
+    else:
+        if quiz_type == "다중 선택 (객관식)":
+            response = retrieval_chainoub.invoke(
+                {
+                    "input": f"Create one {is_topic} multiple-choice question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        elif quiz_type == "주관식":
+            response = retrieval_chainsub.invoke(
+                {
+                    "input":  f"Create one {is_topic} open-ended question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        elif quiz_type == "OX 퀴즈":
+            response = retrieval_chaintf.invoke(
+                {
+                    "input":  f"Create one {is_topic} true or false question focusing on important concepts, following the given format, referring to the following context"
+                }
+            )
+        quiz_questions = response
+
+    return quiz_questions
+
+@st.experimental_fragment
+def grade_quiz_answer(user_answer, quiz_answer):
+    if user_answer.lower() == quiz_answer.lower():
+        grade = "정답"
+    else:
+        grade = "오답"
+    return grade
+
+# 메인 함수
 def quiz_creation_page():
-    st.title("Quiz Creation Page")
-    create_quiz_retrieval_chain(pages=None)
+    placeholder = st.empty()
+    st.session_state.page = 0
+    if st.session_state.page == 0:
+        with placeholder.container():
+            st.title("AI 퀴즈 생성기")
+            if 'selected_page' not in st.session_state:
+                st.session_state.selected_page = ""
 
+            # 퀴즈 유형 선택
+            quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"])
+
+            # 퀴즈 개수 선택
+            num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
+
+            # 파일 업로드 옵션 선택
+            upload_option = st.radio("입력 유형을 선택하세요", ("PDF 파일", "텍스트 파일", "URL", "토픽 선택"))
+
+            # 파일 업로드 옵션
+            st.header("파일 업로드")
+            uploaded_file = None
+            text_content = None
+            topic = None
+            #uploaded_file = st.file_uploader("텍스트, 이미지, 또는 PDF 파일을 업로드하세요.", type=["txt", "jpg", "jpeg", "png", "pdf"])
+
+            # if upload_option == "직접 입력":               
+            #     text_input = st.text_area("텍스트를 입력하세요.")
+            #     st.write(text_input)
+                # text_content = text_input.load().encoding("utf-8", errors='ignore')
+                
+                # result = chardet.detect(text_input)
+                # encoding = result['encoding']
+                # text_content = text_input.decode(encoding)
+          
+                # try:
+                #     text_content = text_input.encoding("utf-8")
+                # except UnicodeDecodeError:
+                #     # 오류 처리 코드 작성
+                #     text_content = text_input.encoding("utf-8")
+
+            
+            if upload_option == "토픽 선택":
+                topic = st.selectbox(
+                   "토픽을 선택하세요",
+                   ("수학", "문학", "비문학", "과학", "test", "langchain", "vector_index"),
+                   index=None,
+                   placeholder="토픽을 선택하세요",
+                ) 
+
+            elif upload_option == "URL":
+                url_area_content = st.text_area("URL을 입력하세요.")
+                loader = RecursiveUrlLoader(url=url_area_content)
+                text_content = loader.load()
+                
+            else:
+                text_content = process_file(uploaded_file, upload_option)
+            
+
+            quiz_questions = []
+
+            if text_content is not None:
+                if st.button('문제 생성 하기'):
+                    with st.spinner('퀴즈를 생성 중입니다...'):
+                        llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
+                        embeddings = OpenAIEmbeddings()
+
+                        # Vectorstore
+                        client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+                        # Define collection and index name
+                        db_name = "langchain_db"
+                        collection_name = "test"
+                        atlas_collection = client[db_name][collection_name]
+                        vector_search_index = "vector_index"
+
+                        # Rag
+                        text_splitter = RecursiveCharacterTextSplitter()
+                        documents = text_content
+                        # documents = text_splitter.split_documents(text_content)
+
+                        # try:
+                        #   connection.test.foo.find_one()
+                        # except pymongo.errors.OperationFailure as e:
+                        #     st.write(e.code)
+                        #     st.write(e.details)
+
+                        vector_search = MongoDBAtlasVectorSearch.from_documents(
+                            documents=documents,
+                            embedding=embeddings,
+                            collection=atlas_collection,
+                            index_name=vector_search_index
+                        )
+
+                        # Instantiate Atlas Vector Search as a retriever
+                        retriever = vector_search.as_retriever(
+                            search_type="similarity",
+                            search_kwargs={"k": 3, "score_threshold": 0.95}
+                        )
+
+                        # PydanticOutputParser 생성
+                        parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
+                        parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
+                        parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
+
+                        prompt = PromptTemplate.from_template(
+                            "{input}, Please answer in KOREAN."
+
+                            "CONTEXT:"
+                            "{context}."
+
+                            "FORMAT:"
+                            "{format}"
+                        )
+                        promptoub = prompt.partial(format=parseroub.get_format_instructions())
+                        promptsub = prompt.partial(format=parsersub.get_format_instructions())
+                        prompttf = prompt.partial(format=parsertf.get_format_instructions())
+
+                        document_chainoub = create_stuff_documents_chain(llm, promptoub)
+                        document_chainsub = create_stuff_documents_chain(llm, promptsub)
+                        document_chaintf = create_stuff_documents_chain(llm, prompttf)
+
+                        # retriever = vector.as_retriever()
+
+                        retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
+                        retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
+                        retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
+
+                        is_topic = None
+
+                        for i in range(num_quizzes):
+                            quiz_questions.append(generate_quiz(quiz_type, text_content, retrieval_chainoub, retrieval_chainsub,retrieval_chaintf))
+                            st.session_state['quizs'] = quiz_questions
+                        st.session_state.selected_page = "퀴즈 풀이"
+                        st.session_state.selected_type = quiz_type
+                        st.session_state.selected_num = num_quizzes
+
+                        st.success('퀴즈 생성이 완료되었습니다!')
+                        st.write(quiz_questions)
+                        st.session_state['quiz_created'] = True
+
+                if st.session_state.get('quiz_created', False):
+                    if st.button('퀴즈 풀기'):
+                        st.switch_page("pages/quiz_solve_page.py")
+
+            elif topic is not None:
+                if st.button('문제 생성 하기'):
+                    with st.spinner('퀴즈를 생성 중입니다...'):
+                        llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
+                        embeddings = OpenAIEmbeddings()
+
+                        
+                        # Define collection and index name
+                        client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+                        if topic == "수학":
+                            is_topic = "Mathematics"
+                        elif topic == "과학":
+                            is_topic = "science"
+                        elif topic == "파이썬":
+                            is_topic = "python"
+                        else:
+                            is_topic = topic
+
+                        # 데이터베이스 및 컬렉션 설정
+                        db_name = "db1"
+                        collection_name = "PythonDatascienceinterview"
+                        atlas_collection = client[db_name][collection_name]
+                        vector_search_index = "vector_index"
+
+                        docs = WikipediaLoader(query=f"{is_topic}", load_max_docs=3).load()
+
+                        # Define a prompt template
+
+                        # Rag
+                        text_splitter = RecursiveCharacterTextSplitter()
+                        documents = text_splitter.split_documents(docs)
+
+                        # try:
+                        #   connection.test.foo.find_one()
+                        # except pymongo.errors.OperationFailure as e:
+                        #     st.write(e.code)
+                        #     st.write(e.details)
+
+                        vector_search = MongoDBAtlasVectorSearch.from_documents(
+                            documents=documents,
+                            embedding=embeddings,
+                            collection=atlas_collection,
+                            index_name=vector_search_index
+                        )
+
+                        # Instantiate Atlas Vector Search as a retriever
+                        retriever = vector_search.as_retriever(
+                            search_type="similarity",
+                            search_kwargs={"k": 3, "score_threshold": 0.9}
+                        )
+
+                        
+
+                        # PydanticOutputParser 생성
+                        parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
+                        parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
+                        parsertf = PydanticOutputParser(pydantic_object=CreateQuizTF)
+
+                        prompt = PromptTemplate.from_template(
+                            "{input}, Please answer in KOREAN."
+
+                            "CONTEXT:"
+                            "{context}."
+
+                            "FORMAT:"
+                            "{format}"
+                        )
+                        promptoub = prompt.partial(format=parseroub.get_format_instructions())
+                        promptsub = prompt.partial(format=parsersub.get_format_instructions())
+                        prompttf = prompt.partial(format=parsertf.get_format_instructions())
+
+                        document_chainoub = create_stuff_documents_chain(llm, promptoub)
+                        document_chainsub = create_stuff_documents_chain(llm, promptsub)
+                        document_chaintf = create_stuff_documents_chain(llm, prompttf)
+
+                        retrieval_chainoub = create_retrieval_chain(retriever, document_chainoub)
+                        retrieval_chainsub = create_retrieval_chain(retriever, document_chainsub)
+                        retrieval_chaintf = create_retrieval_chain(retriever, document_chaintf)
+
+                        for i in range(num_quizzes):
+                            quiz_questions.append(generate_quiz(quiz_type, is_topic, retrieval_chainoub, retrieval_chainsub,retrieval_chaintf))
+                            st.session_state['quizs'] = quiz_questions
+                        st.session_state.selected_page = "퀴즈 풀이"
+                        st.session_state.selected_type = quiz_type
+                        st.session_state.selected_num = num_quizzes
+
+                        st.success('퀴즈 생성이 완료되었습니다!')
+                        st.write(quiz_questions)
+                        st.session_state['quiz_created'] = True
+
+                if st.session_state.get('quiz_created', False):
+                    if st.button('퀴즈 풀기'):
+                        st.switch_page("pages/quiz_solve_page.py")
