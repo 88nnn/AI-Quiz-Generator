@@ -1,81 +1,6 @@
-import streamlit as st
-from PIL import Image
-from PyPDF2 import PdfReader
-import io
-from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import create_retrieval_chain
-from langchain.output_parsers import PydanticOutputParser
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from pymongo import MongoClient
-
 # MongoDB 연결
 client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-
-
-def process_file(uploaded_file, upload_option):
-    """
-    업로드된 파일을 처리하여 텍스트로 변환하는 함수
-
-    Args:
-        uploaded_file (file object): 업로드된 파일 객체
-        upload_option (str): 업로드된 파일의 유형
-
-    Returns:
-        str: 변환된 텍스트 내용
-    """
-    # 파일 유형에 따라 처리
-    if uploaded_file.type == "text/plain":
-        text_content = uploaded_file.read().decode("utf-8")
-    elif uploaded_file.type.startswith("image/"):
-        image = Image.open(uploaded_file)
-        text_content = pytesseract.image_to_string(image)
-    elif uploaded_file.type == "application/pdf":
-        pdf_reader = PdfReader(io.BytesIO(uploaded_file.read()))
-        text_content = ""
-        for page in pdf_reader.pages:
-            text_content += page.extract_text()
-    else:
-        st.error("지원하지 않는 파일 형식입니다.")
-        return None
-
-    # 텍스트 분리 및 처리
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=100,
-        chunk_overlap=20,
-        length_function=len,
-        is_separator_regex=False,
-    )
-    texts = text_splitter.create_documents([text_content])
-
-    return texts
-
-
-def generate_quiz(quiz_type, is_topic, retriever_chain):
-    """
-    퀴즈를 생성하는 함수
-
-    Args:
-        quiz_type (str): 퀴즈 유형
-        is_topic (str): 선택된 토픽
-        retriever_chain: 텍스트 검색 및 퀴즈 생성을 위한 검색 체인
-
-    Returns:
-        dict: 생성된 퀴즈
-    """
-    # 토픽에 따라 퀴즈 생성
-    if is_topic is None:
-        input_text = f"Create one {quiz_type} question focusing on important concepts, following the given format, referring to the following context"
-    else:
-        input_text = f"Create one {is_topic} {quiz_type} question focusing on important concepts, following the given format, referring to the following context"
-
-    response = retriever_chain.invoke({"input": input_text})
-    quiz_questions = response
-
-    return quiz_questions
-
+connection_string = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 def quiz_creation_page():
     """
@@ -110,7 +35,7 @@ def quiz_creation_page():
             # 벡터 검색기 생성
             embeddings = OpenAIEmbeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
-                "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+                connection_string,  # 수정된 부분
                 collection_name,
                 embeddings,
                 vector_search_index
@@ -176,7 +101,7 @@ def quiz_creation_page():
             # 벡터 검색기 생성
             embeddings = OpenAIEmbeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
-                client,
+                connection_string,  # 수정된 부분
                 collection_name,
                 embeddings,
                 vector_search_index
