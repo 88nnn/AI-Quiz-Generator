@@ -30,7 +30,7 @@ def quiz_creation_page():
     if upload_option == "토픽 선택":
         topic = st.selectbox(
            "토픽을 선택하세요",
-           ("수학", "문학", "비문학", "과학", "test", "langchain", "vector_index"),
+           ("수학", "문학", "비문학", "data science", "test", "langchain", "vector_index"),
            index=None,
            placeholder="토픽을 선택하세요",
         )
@@ -40,18 +40,19 @@ def quiz_creation_page():
             embeddings = get_embeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
                 connection_string,
-                "PythonDatascienceinterview",
+                "db1.PythonDatascienceinterview",
                 embeddings,
                 "vector_index"
             )
 
             docs = WikipediaLoader(query=topic, load_max_docs=3).load()
+            db_collection = client[db1][PythonDatascienceinterview]
             text_splitter = RecursiveCharacterTextSplitter()
             documents = text_splitter.split_documents(docs)
             vector_search = MongoDBAtlasVectorSearch.from_documents(
                 documents=documents,
                 embedding=embeddings,
-                collection=client.db1.PythonDatascienceinterview,
+                collection=db_collection,
                 index_name="vector_index"
             )
             st.write(vector_search.search_results())
