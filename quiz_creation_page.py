@@ -534,6 +534,7 @@ def quiz_creation_page():
                         #docs = WikipediaLoader(query=f"{is_topic}", load_max_docs=3).load()
 
                         # Define a prompt template
+                        docs = topic
 
                         # Rag
                         text_splitter = RecursiveCharacterTextSplitter()
