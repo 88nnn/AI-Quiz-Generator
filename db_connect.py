@@ -5,7 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from pymongo import MongoClient
 
-export OPENAI_API_KEY="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"
+OPENAI_API_KEY="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"
 
 
 # MongoDB 연결
