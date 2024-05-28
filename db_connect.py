@@ -176,7 +176,7 @@ def quiz_creation_page():
             # 벡터 검색기 생성
             embeddings = OpenAIEmbeddings()
             retriever = MongoDBAtlasVectorSearch.from_connection_string(
-                "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+                client,
                 collection_name,
                 embeddings,
                 vector_search_index
