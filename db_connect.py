@@ -1,3 +1,19 @@
+import streamlit as st
+from PIL import Image
+from PyPDF2 import PdfReader
+import io
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import create_retrieval_chain
+from langchain.output_parsers import PydanticOutputParser
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from pymongo import MongoClient
+
+
+
+
 # MongoDB 연결
 client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 connection_string = "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
