@@ -2,7 +2,7 @@ import streamlit as st
 import json
 from pymongo import MongoClient, UpdateOne
 from pymongo.errors import OperationFailure
-from langchain_community.embeddings import OpenAIEmbeddings  # 수정된 부분
+from langchain_openai import OpenAIEmbeddings  # 수정된 부분
 
 # MongoDB 연결 설정
 def connect_db():
@@ -24,6 +24,9 @@ def vectorize_and_store(data, collection_name):
     vector_operations = []
 
     for document in data:
+        if 'text' not in document:
+            raise ValueError("Each document must contain a 'text' field")
+        
         text = document['text']
         vector = embeddings.embed_text(text)
         operation = UpdateOne({'_id': document['_id']}, {'$set': {'vector': vector.tolist()}})
