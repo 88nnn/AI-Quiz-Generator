@@ -1,0 +1,53 @@
+import streamlit as st
+import json
+from pymongo import MongoClient, UpdateOne
+from pymongo.errors import OperationFailure
+from langchain.embeddings import OpenAIEmbeddings
+
+# MongoDB 연결 설정
+def connect_db():
+    client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    return client["db1"]
+
+# 몽고DB에 문서 삽입
+def insert_documents(collection_name, documents):
+    db = connect_db()
+    collection = db["study"]
+    collection.insert_many(documents)
+
+# 텍스트를 벡터화하고 몽고DB에 저장
+def vectorize_and_store(data, collection_name):
+    embeddings = OpenAIEmbeddings()
+    vector_operations = []
+
+    for document in data:
+        text = document['text']
+        vector = embeddings.embed_text(text)
+        operation = UpdateOne({'_id': document['_id']}, {'$set': {'vector': vector.tolist()}})
+        vector_operations.append(operation)
+
+    db = connect_db()
+    collection = db["study"]
+    collection.bulk_write(vector_operations)
+
+# Streamlit UI
+st.title("JSON 파일 업로드 및 MongoDB 저장")
+
+upload_option = st.radio("입력 유형을 선택하세요", ("JSON 파일",))
+
+uploaded_file = st.file_uploader("JSON 파일을 업로드하세요.", type=["json"])
+
+if uploaded_file is not None and upload_option == "JSON 파일":
+    try:
+        # JSON 파일 읽기
+        json_content = json.load(uploaded_file)
+        
+        # 문서 삽입
+        insert_documents("study", json_content)
+        
+        # 벡터화 및 저장
+        vectorize_and_store(json_content, "study")
+
+        st.success("JSON 파일이 성공적으로 저장되었습니다.")
+    except Exception as e:
+        st.error(f"파일 저장 중 오류가 발생했습니다: {e}")
