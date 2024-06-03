@@ -28,3 +28,5 @@ PyPDF2
 pymongo
 Pillow
 faiss-cpu
+wikipedia
+beautifulsoup4
