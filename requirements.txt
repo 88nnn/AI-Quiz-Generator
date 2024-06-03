@@ -28,4 +28,3 @@ PyPDF2
 pymongo
 Pillow
 faiss-cpu
-streamlit-aws-cognito
