@@ -11,6 +11,9 @@ def connect_db():
 
 # 몽고DB에 문서 삽입
 def insert_documents(collection_name, documents):
+    if not documents:
+        raise ValueError("documents must be a non-empty list")
+    
     db = connect_db()
     collection = db[collection_name]
     collection.insert_many(documents)
@@ -41,6 +44,10 @@ if uploaded_file is not None and upload_option == "JSON 파일":
     try:
         # JSON 파일 읽기
         json_content = json.load(uploaded_file)
+        
+        # json_content가 리스트가 아니면 리스트로 감싸기
+        if not isinstance(json_content, list):
+            json_content = [json_content]
         
         # 문서 삽입
         insert_documents("study", json_content)
