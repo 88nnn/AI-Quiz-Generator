@@ -30,4 +30,3 @@ Pillow
 faiss-cpu
 wikipedia
 beautifulsoup4
-json
