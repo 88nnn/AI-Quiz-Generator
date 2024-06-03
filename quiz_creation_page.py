@@ -325,7 +325,7 @@ def quiz_creation_page():
             num_quizzes = st.number_input("생성할 퀴즈의 개수를 입력하세요:", min_value=1, value=5, step=1)
 
             # 파일 업로드 옵션 선택
-            upload_option = st.radio("입력 유형을 선택하세요", ("PDF 파일", "텍스트 파일", "URL", "토픽 선택"),horizontal=True)
+            upload_option = st.radio("입력 유형을 선택하세요", ("PDF 파일", "텍스트 파일", "JSON", "URL", "토픽 선택"),horizontal=True)
 
             # 파일 업로드 옵션
             st.header("파일 업로드")
