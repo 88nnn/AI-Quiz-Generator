@@ -29,6 +29,7 @@ from langchain_community.document_loaders.image import UnstructuredImageLoader
 from langchain_community.vectorstores import FAISS
 from bs4 import BeautifulSoup as Soup
 from urllib.parse import urlparse
+import json
 
 def is_url(input_string):
     try:
@@ -204,6 +205,8 @@ def process_file(uploaded_file, upload_option):
         uploaded_file = st.file_uploader("이미지 파일을 업로드하세요.", type=["jpg", "jpeg", "png"])
     elif upload_option == "PDF 파일":
         uploaded_file = st.file_uploader("PDF 파일을 업로드하세요.", type=["pdf"])
+    elif upload_option == "JSON 파일":
+        uploaded_file = st.file_uploader("JSON 파일을 업로드하세요.", type=["json"])
     else:
         uploaded_file = None
 
@@ -222,6 +225,12 @@ def process_file(uploaded_file, upload_option):
         text_content = ""
         for page in pdf_reader.pages:
             text_content += page.extract_text()
+    elif uploaded_file.type == "json":
+        #jsonobj= json.loads(json_data)
+        #with open('data.json', 'w') as f:
+         #   json.dump(uploaded_file, f, indent=2)
+        jsonString = open(uploaded_file)
+        text_content = json.load(jsonString)
     else:
         st.error("지원하지 않는 파일 형식입니다.")
         return None
