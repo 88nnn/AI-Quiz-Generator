@@ -53,11 +53,11 @@ client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mo
 
 def connect_db():
     client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    return client[langchain_db]
+    return client[db1]
 
 def insert_documents(collection_name, documents):
     db = connect_db()
-    collection = db[test]
+    collection = db[study]
     collection.insert_many(documents)
 
 def vectorize_and_store(data, collection_name):
@@ -71,12 +71,12 @@ def vectorize_and_store(data, collection_name):
         vector_operations.append(operation)
 
     db = connect_db()
-    collection = db[test]
+    collection = db[study]
     collection.bulk_write(vector_operations)
 
 def search_vectors(collection_name, query_vector, top_k=10):
     db = connect_db()
-    collection = db[test]
+    collection = db[study]
     results = collection.aggregate([
         {
             '$search': {
@@ -98,8 +98,8 @@ def search_vectors(collection_name, query_vector, top_k=10):
 def retrieve_results(user_query):
     # Create MongoDB Atlas Vector Search instance
     vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-        "mongodb+srv://username:password@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=YourApp",
-        "langchain_db.test",
+        "mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "db1.study",
         OpenAIEmbeddings(model="gpt-3.5-turbo-0125"),
         index_name="vector_index"
     )
@@ -391,8 +391,8 @@ def quiz_creation_page():
                         # client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
                         # Define collection and index name
-                        db_name = "langchain_db"
-                        collection_name = "test"
+                        db_name = "db1"
+                        collection_name = "study"
                         atlas_collection = client[db_name][collection_name]
                         vector_search_index = "vector_index"
 
@@ -497,8 +497,8 @@ def quiz_creation_page():
 
 
                         # 데이터베이스 및 컬렉션 설정
-                        db_name = "langchain_db"
-                        collection_name = "test"
+                        db_name = "db1"
+                        collection_name = "study"
                         atlas_collection = client[db_name][collection_name]
                         vector_search_index = "vector_index"
 
