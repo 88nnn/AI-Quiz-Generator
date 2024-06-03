@@ -2,7 +2,7 @@ import streamlit as st
 import json
 from pymongo import MongoClient, UpdateOne
 from pymongo.errors import OperationFailure
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings  # 수정된 부분
 
 # MongoDB 연결 설정
 def connect_db():
@@ -12,7 +12,7 @@ def connect_db():
 # 몽고DB에 문서 삽입
 def insert_documents(collection_name, documents):
     db = connect_db()
-    collection = db["study"]
+    collection = db[collection_name]
     collection.insert_many(documents)
 
 # 텍스트를 벡터화하고 몽고DB에 저장
@@ -27,7 +27,7 @@ def vectorize_and_store(data, collection_name):
         vector_operations.append(operation)
 
     db = connect_db()
-    collection = db["study"]
+    collection = db[collection_name]
     collection.bulk_write(vector_operations)
 
 # Streamlit UI
