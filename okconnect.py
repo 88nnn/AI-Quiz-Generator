@@ -29,7 +29,7 @@ def vectorize_and_store(data, collection_name):
             raise ValueError("Each document must contain an '_id' field")
         
         text = document.get('Problem', '')  # 'Problem' 필드가 없으면 빈 문자열 사용
-        vector = embeddings.embed(text)  # 임베딩 생성 메서드 사용
+        vector = embeddings.embedding(text)  # 임베딩 생성 메서드 사용
         
         # 'page' 필드가 없는 경우 자동 생성
         if 'page' not in document:
