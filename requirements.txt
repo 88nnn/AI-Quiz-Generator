@@ -8,7 +8,7 @@ pytesseract
 pillow
 faiss-cpu
 langchain_community
-scikit-learn
+scikit_learn
 PyYAML
 streamlit_authenticator
 bcrypt
@@ -27,6 +27,8 @@ pytesseract
 PyPDF2
 pymongo
 Pillow
-faiss-cpu
+faiss_cpu
 wikipedia
 beautifulsoup4
+streamlit_cognito-auth
+
