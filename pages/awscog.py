@@ -3,10 +3,10 @@ import boto3
 
 def start(): 
      placeholder = st.empty()
-    if 'number' not in st.session_state:
-        st.session_state.number = 0
     if 'user' not in st.session_state:
-        st.session_state.user = 0  # 사용자 선택 답변을 저장할 배열 초기화
+        st.session_state.user = []  # 사용자 닉네임을 저장할 배열 초기화
+    else:
+         st.session_state.user = user
     
         with placeholder.container():
             st.title("비회원으로 퀴즈 이용하러 돌아가기")
