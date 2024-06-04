@@ -2,15 +2,17 @@ import streamlit as st
 import boto3
 
 def start(): 
-    placeholder = st.empty()
-    st.session_state.page = 0
-    if st.session_state.page == 0:
+     placeholder = st.empty()
+    if 'number' not in st.session_state:
+        st.session_state.number = 0
+    if 'user' not in st.session_state:
+        st.session_state.user = 0  # 사용자 선택 답변을 저장할 배열 초기화
+    
         with placeholder.container():
             st.title("비회원으로 퀴즈 이용하러 돌아가기")
             if st.button('퀴즈 생성 바로가기'):
                 st.switch_page("quiz_creation_page.py")
-            elif 'selected_page' not in st.session_state:
-                st.session_state.selected_page = ''
+            
     # AWS Cognito 설정
     region_name = 'us-east-1'
     client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
