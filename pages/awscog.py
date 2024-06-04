@@ -10,7 +10,7 @@ def start():
             if st.button('퀴즈 생성 바로가기'):
                 st.switch_page("quiz_creation_page.py")
             elif 'selected_page' not in st.session_state:
-                st.session_state.selected_page = ""
+                st.session_state.selected_page = ''
     # AWS Cognito 설정
     region_name = 'us-east-1'
     client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
