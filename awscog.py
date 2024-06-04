@@ -37,13 +37,13 @@ if st.button("Login"):
 
 if st.button('회원가입'):
     st.switch_page("sign.py")
-    except OperationFailure as e:
-        st.write(f"Failed to fetch documents: {e}")
+        except OperationFailure as e:
+            st.write(f"Failed to fetch documents: {e}")
 
 if st.button('퀴즈 생성 바로가기'):
     st.switch_page("quiz_creation_page.py")
-    except OperationFailure as e:
-        st.write(f"Failed to fetch documents: {e}")
+        except OperationFailure as e:
+            st.write(f"Failed to fetch documents: {e}")
 
 
 # 사용자 전용 서비스 코드 예시
@@ -53,6 +53,6 @@ if 'user' in st.session_state:
         st.write("저장되셨습니다: 결과")
         if st.button('퀴즈 생성 바로가기'):
             st.switch_page("quiz_creation_page.py")
-    except OperationFailure as e:
-        st.write(f"Failed to fetch documents: {e}")
+            except OperationFailure as e:
+                st.write(f"Failed to fetch documents: {e}")
     # 사용자 전용 서비스 코드 추가
