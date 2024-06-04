@@ -32,3 +32,4 @@ wikipedia
 beautifulsoup4
 streamlit_cognito-auth
 boto3
+CognitoAuth
