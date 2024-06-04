@@ -304,12 +304,11 @@ def quiz_creation_page():
             st.title("AI Quiz Generator")
             if 'selected_page' not in st.session_state:
                 st.session_state.selected_page = ""
-                if 'user' not in st.session_state:
-                    st.session_state.user = None  # 초기화
-                    if st.session_state.user:
-                        st.write(f"Logged in as: {st.session_state.user}")
-                    else:
-                        st.write("비회원으로 퀴즈를 이용 중입니다.")
+                user = st.session_state.get("user", ["Unknown User"])[0]
+                if st.session_state.user:
+                    st.write(f"Logged in as: {st.session_state.user}")
+                else:
+                    st.write("비회원으로 퀴즈를 이용 중입니다.")
                     # 퀴즈 유형 선택
             quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"],horizontal=True)
 
