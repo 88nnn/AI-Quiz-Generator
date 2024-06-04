@@ -291,7 +291,7 @@ def grade_quiz_answer(user_answer, quiz_answer):
 # 메인 함수
 def quiz_creation_page():
     placeholder = st.empty()
-    st.title("퀴즈 생성")
+    #st.title("퀴즈 생성")
     st.session_state.page = 0
     if st.session_state.page == 0:
         with placeholder.container():
