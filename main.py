@@ -5,6 +5,7 @@ import quiz_grading_page
 import sign
 #import uplodes
 import topic_creation
+import regist
 
 def main():
     selected_page = "퀴즈 생성"
@@ -17,7 +18,7 @@ def main():
     elif selected_page == "퀴즈 채점":
         quiz_grading_page.quiz_grading_page()
     elif selected_page == "로그인":
-        sign.sign()
+        regist
 
 if __name__ == "__main__":
     main()
