@@ -77,7 +77,7 @@ def login_user(username, password):
         st.error("잘못된 사용자 이름 또는 비밀번호입니다.")
 
 def sign():
-    st.title("User Registration & Login")
+    st.title("회원가입User Registration")
     
     # User registration
     st.header("Register")
