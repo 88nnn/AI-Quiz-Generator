@@ -1,7 +1,7 @@
 streamlit
 PyPDF2
 langchain
-openai
+openai==0.28.1
 langchain_openai
 langchain_core
 pytesseract
