@@ -7,6 +7,7 @@ def register_cognito_user(username, password):
 
     Args:
         username (str): 사용자 이름.
+        email (str): 사용자 이메일.
         password (str): 비밀번호.
 
     Returns:
@@ -23,6 +24,7 @@ def register_cognito_user(username, password):
         response = cognito_client.sign_up(
             ClientId=client_id,
             Username=username,
+            Email=email
             Password=password
         )
         st.success("회원가입이 성공적으로 완료되었습니다!")
@@ -40,9 +42,10 @@ def sign():
     # User registration
     st.header("Register")
     new_username = st.text_input("Enter a new username:")
+    new_email = st.text_input("Enter a new email:", type="email")
     new_password = st.text_input("Enter a new password:", type="password")
     if st.button("Register"):
-        if register_cognito_user(new_username, new_password):
+        if register_cognito_user(new_username, new_email, new_password):
             st.success("회원가입이 성공적으로 완료되었습니다!")
             st.write("로그인 페이지로 이동하려면 아래 버튼을 클릭하세요.")
             if st.button("로그인 페이지로 이동"):
