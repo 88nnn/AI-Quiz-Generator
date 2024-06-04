@@ -20,7 +20,7 @@ def main():
     elif selected_page == "퀴즈 리뷰":
         quiz_grading_page.quiz_grading_page()
     elif selected_page == "로그인":
-        awscog
+        awscog.start()
     #elif selected_page == "회원가입":
      #   awscog.sign()  # 회원가입 함수 호출
     #elif selected_page == "로그인":
