@@ -38,18 +38,7 @@ def is_url(input_string):
         return False
 
 
-#아이디는 코드에 들어가진 않습니다.
-#embedings 항목에 array 형식으로 저장된 벡터 값으로 벡터 검색이 되고 atlas vextet index 항목에서 검색기로 등록해주면 검색 가능하다고 합니다. 
-#acm41th:vCcYRo8b4hsWJkUj@cluster0 여기까지가 아이디:비밀번호:클러스터 주소라 필수적입니다. 마지막 앱네임도 클러스터명
-
-#Vectorstore
 client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-#client['your_database_name']이 데베 이름입니다. 데베1은 파이썬 관련 정보가 용량이 적길래 일단 넣어줬습니다.
-#임베딩 항목은 따로 처리해서 넣어줘야 할 겁니다.
-#랭체인도 데모 데이터로 몽고디비 관련 내용이고 엠플릭스도 영화 관련 데모 데이터입니다.
-#콜렉션은 각 디비 안에 있는 데이터셋을 뜻합니다. 디비가 폴더고 얘가 파일 같습니다.
-#임베딩값이 들어 있는 콜렉션은 일단 embeded_movies랑 test가 있습니다. 각각 sample_mflix.embedded_movies
-#, langchain_db.test처럼 넣어서 쓰면 됩니다.
 
 def connect_db():
     client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -302,14 +291,26 @@ def grade_quiz_answer(user_answer, quiz_answer):
 # 메인 함수
 def quiz_creation_page():
     placeholder = st.empty()
+    
+        
+
+    st.title("퀴즈 생성")
+    
+    
+
     st.session_state.page = 0
     if st.session_state.page == 0:
         with placeholder.container():
             st.title("AI Quiz Generator")
             if 'selected_page' not in st.session_state:
                 st.session_state.selected_page = ""
-
-            # 퀴즈 유형 선택
+                if 'user' not in st.session_state:
+                    st.session_state.user = None  # 초기화
+                    if st.session_state.user:
+                        st.write(f"Logged in as: {st.session_state.user}")
+                    else:
+                        st.write("비회원으로 퀴즈를 이용 중입니다.")
+                    # 퀴즈 유형 선택
             quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"],horizontal=True)
 
             # 퀴즈 개수 선택
@@ -532,7 +533,6 @@ def quiz_creation_page():
                         )
 
                         
-
                         # PydanticOutputParser 생성
                         parseroub = PydanticOutputParser(pydantic_object=CreateQuizoub)
                         parsersub = PydanticOutputParser(pydantic_object=CreateQuizsub)
