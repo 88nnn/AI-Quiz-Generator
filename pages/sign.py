@@ -42,7 +42,7 @@ def sign():
     # User registration
     st.header("Register")
     new_username = st.text_input("Enter a new username:")
-    new_email = st.text_input("Enter a new email:", type="email")
+    new_email = st.text_input("Enter a new email:")
     new_password = st.text_input("Enter a new password:", type="password")
     if st.button("Register"):
         if register_cognito_user(new_username, new_email, new_password):
