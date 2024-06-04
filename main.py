@@ -11,15 +11,15 @@ def main():
                                                "로그인", "회원가입", "퀴즈 저장"])
 
     if selected_page == "퀴즈 생성":
-        pages.quiz_creation_page.quiz_creation_page()
+        quiz_creation_page.quiz_creation_page()
     elif selected_page == "퀴즈 풀기":
-        pages.quiz_solve_page.quiz_solve_page()
+        quiz_solve_page.quiz_solve_page()
     elif selected_page == "퀴즈 리뷰":
-        pages.quiz_grading_page.quiz_grading_page()
+        quiz_grading_page.quiz_grading_page()
     elif selected_page == "로그인":
-        pages.awscog.start()
+        awscog.start()
     elif selected_page == "회원가입":
-        pages.sign.sign()
+        sign.sign()
 
 if __name__ == "__main__":
     main()
