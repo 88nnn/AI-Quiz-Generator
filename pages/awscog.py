@@ -1,7 +1,7 @@
 import streamlit as st
 import boto3
 
-def start(): 
+def start():
     placeholder = st.empty()
     if 'user' not in st.session_state:
         st.session_state.user = None  # 초기화
@@ -10,7 +10,7 @@ def start():
         with placeholder.container():
             st.title("퀴즈 이용하러 돌아가기")
             if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("quiz_creation_page")
+                st.experimental_set_query_params(page="quiz_creation_page")  # 페이지 전환
             st.title("여기는 로그인한 가입자 전용 서비스입니다.")
             if st.button('로그아웃'):
                 st.session_state.user = None
@@ -18,12 +18,12 @@ def start():
             if st.button("퀴즈 저장"):
                 st.write("저장되셨습니다: 결과")
                 if st.button('퀴즈 생성 바로가기'):
-                    st.switch_page("quiz_creation_page")
+                    st.experimental_set_query_params(page="quiz_creation_page")  # 페이지 전환
     else:
         with placeholder.container():
             st.title("비회원으로 퀴즈 이용하러 돌아가기")
             if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("quiz_creation_page")
+                st.experimental_set_query_params(page="quiz_creation_page")  # 페이지 전환
             
             # AWS Cognito 설정
             region_name = 'us-east-1'
@@ -56,7 +56,7 @@ def start():
                     st.error(f"오류 발생: {str(e)}")
 
             if st.button('회원가입'):
-                st.switch_page("sign")
+                st.experimental_set_query_params(page="sign")  # 페이지 전환
 
 if __name__ == "__main__":
     start()
