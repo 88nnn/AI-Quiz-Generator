@@ -24,7 +24,7 @@ def register_cognito_user(username, password):
         response = cognito_client.sign_up(
             ClientId=client_id,
             Username=username,
-            Email=email
+            Email=email,
             Password=password
         )
         st.success("회원가입이 성공적으로 완료되었습니다!")
