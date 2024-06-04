@@ -302,7 +302,7 @@ def quiz_creation_page():
             if user:
                 st.write(f"안녕하세요, {user}님!")
             else:
-                st.write("비회원으로 퀴즈를 이용 중입니다.")
+                st.write("비회원으로 퀴즈를 이용 중입니다. 회원 전용 서비스는 유저 페이지를 참고해 주세요.")
             if st.button('유저 페이지'):
                         st.switch_page("pages/awscog.py")
                     # 퀴즈 유형 선택
