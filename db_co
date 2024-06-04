@@ -1,0 +1,17 @@
+#임포트
+import pymongo
+import sys
+#클라이언트 생성과 DocumentDB과의 접속
+client = pymongo.MongoClient(‘mongodb://[※EC2의IPv4주소]:[※패스워드]@[※DB호스트].cluster-cserfiucxgkt.ap-northeast-1.docdb.amazonaws.com:27017/?ssl=true&ssl_ca_certs=rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false’)
+#데이터베이스 지정
+db = client.customer_db
+#컬렉션 지정
+col = db.customer
+#문서 삽입
+db.col.insert_one({“ID”:”1", “Name”:”test taro” })
+db.col.insert_one({“ID”:”2", “Name”:”test jiro” })
+db.col.insert_one({“ID”:”3", “Name”:”test saburo” })
+#컬렉션 내 모든 문서 검색
+result = db.col.find()
+#접속 종료
+client.close()
