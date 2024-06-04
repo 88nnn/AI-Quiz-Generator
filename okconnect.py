@@ -7,7 +7,7 @@ from langchain_openai import OpenAIEmbeddings
 # MongoDB 연결 설정
 def connect_db():
     client = MongoClient("mongodb+srv://acm41th:vCcYRo8b4hsWJkUj@cluster0.ctxcrvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    return client["db1"]
+    return client[db1]
 
 # 몽고DB에 문서 삽입
 def insert_documents(collection_name, documents):
@@ -15,7 +15,7 @@ def insert_documents(collection_name, documents):
         raise ValueError("documents must be a non-empty list")
     
     db = connect_db()
-    collection = db[collection_name]
+    collection = db[study]
     collection.insert_many(documents)
 
 # 벡터화하고 몽고DB에 저장
@@ -27,8 +27,8 @@ def vectorize_and_store(data, collection_name):
         if '_id' not in document:
             raise ValueError("Each document must contain an '_id' field")
         
-        text = document.get('Problem', '')  # 'Problem' 필드가 없으면 빈 문자열 사용
-        vector = embeddings.embed_text(text)
+        text = document.get('Answer', 'text', 'Text', '')  # 필드가 없으면 빈 문자열 사용
+        vector = embeddings.embed(text)  # 임베딩 생성 메서드 사용
         
         operation = UpdateOne(
             {'_id': document['_id']},
@@ -41,7 +41,7 @@ def vectorize_and_store(data, collection_name):
         vector_operations.append(operation)
 
     db = connect_db()
-    collection = db[collection_name]
+    collection = db[study]
     collection.bulk_write(vector_operations)
 
 # Streamlit UI
