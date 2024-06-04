@@ -1,6 +1,30 @@
 import streamlit as st
 import boto3
 
+def logout_cognito():
+    # 코그니토 클라이언트 초기화
+    region_name = 'us-east-1'
+    client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+    user_pool_id = 'us-east-1_TXA2Lha1Y'
+    cognito_client = boto3.client('cognito-idp', region_name=region_name)
+
+    # 현재 사용자 정보 가져오기
+    username = st.session_state.user
+    
+    # 코그니토에서 사용자 세션 무효화
+    try:
+        cognito_client.global_sign_out(
+            AccessToken=username
+        )
+        st.write("로그아웃되었습니다.")
+    except cognito_client.exceptions.NotAuthorizedException:
+        st.error("로그아웃 실패: 사용자 인증 토큰이 올바르지 않습니다.")
+    except Exception as e:
+        st.error(f"로그아웃 중 오류 발생: {str(e)}")
+
+    # Streamlit 세션에서 사용자 정보 제거
+    st.session_state.user = None
+
 def start():
     placeholder = st.empty()
     if 'user' not in st.session_state:
@@ -13,7 +37,7 @@ def start():
                 st.switch_page("pages/quiz_creation_page.py")  # 페이지 전환
             st.title("여기는 로그인한 가입자 전용 서비스입니다.")
             if st.button('로그아웃'):
-                st.session_state.user = None
+                logout_cognito()  # 코그니토 로그아웃 수행
                 st.experimental_rerun()
             if st.button("퀴즈 저장"):
                 st.write("저장되셨습니다: 결과")
