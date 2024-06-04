@@ -291,24 +291,18 @@ def grade_quiz_answer(user_answer, quiz_answer):
 # 메인 함수
 def quiz_creation_page():
     placeholder = st.empty()
-    
-        
-
     st.title("퀴즈 생성")
-    
-    
-
     st.session_state.page = 0
     if st.session_state.page == 0:
         with placeholder.container():
             st.title("AI Quiz Generator")
             if 'selected_page' not in st.session_state:
                 st.session_state.selected_page = ""
-                user = st.session_state.get("user", ["Unknown User"])[0]
-                if st.session_state.user:
-                    st.write(f"Logged in as: {st.session_state.user}")
-                else:
-                    st.write("비회원으로 퀴즈를 이용 중입니다.")
+            user = st.session_state.get("user", None)
+            if user:
+                st.write(f"안녕하세요, {user}님!")
+            else:
+                st.write("비회원으로 퀴즈를 이용 중입니다.")
                     # 퀴즈 유형 선택
             quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"],horizontal=True)
 
