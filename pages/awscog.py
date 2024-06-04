@@ -2,17 +2,15 @@ import streamlit as st
 import boto3
 
 def start(): 
-     placeholder = st.empty()
+    placeholder = st.empty()
     if 'user' not in st.session_state:
-        st.session_state.user = []  # 사용자 닉네임을 저장할 배열 초기화
-    else:
-         st.session_state.user = user
-    
-        with placeholder.container():
-            st.title("비회원으로 퀴즈 이용하러 돌아가기")
-            if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("quiz_creation_page.py")
-            
+        st.session_state.user = None  # 초기화
+
+    with placeholder.container():
+        st.title("비회원으로 퀴즈 이용하러 돌아가기")
+        if st.button('퀴즈 생성 바로가기'):
+            st.switch_page("quiz_creation_page")
+
     # AWS Cognito 설정
     region_name = 'us-east-1'
     client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
@@ -34,27 +32,23 @@ def start():
                     'PASSWORD': password
                 }
             )
-            # 사용자 정보 추출 (예시)
             user = response['AuthenticationResult']
             st.write(f"Welcome, {username}")
-            # 이후 사용자 전용 서비스를 운영하기 위한 동시성 코드 추가
-            st.session_state['user'] = user
+            st.session_state.user = username  # 유저네임 저장
         except cognito_client.exceptions.NotAuthorizedException:
             st.error("인증 실패: 사용자 이름 또는 비밀번호가 올바르지 않습니다.")
         except Exception as e:
             st.error(f"오류 발생: {str(e)}")
 
     if st.button('회원가입'):
-        st.switch_page("sign.py")
+        st.switch_page("sign")
 
-    # 사용자 전용 서비스 코드 예시
-    if 'user' in st.session_state:
+    if st.session_state.user:
         st.write("여기는 로그인한 사용자 전용 서비스입니다.")
         if st.button("퀴즈 저장"):
             st.write("저장되셨습니다: 결과")
             if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("quiz_creation_page.py")
-            # 사용자 전용 서비스 코드 추가
+                st.switch_page("quiz_creation_page")
 
 if __name__ == "__main__":
     start()
