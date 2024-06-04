@@ -303,6 +303,8 @@ def quiz_creation_page():
                 st.write(f"안녕하세요, {user}님!")
             else:
                 st.write("비회원으로 퀴즈를 이용 중입니다.")
+            if st.button('유저 페이지'):
+                        st.switch_page("pages/awscog.py")
                     # 퀴즈 유형 선택
             quiz_type = st.radio("생성할 퀴즈 유형을 선택하세요:", ["다중 선택 (객관식)", "주관식", "OX 퀴즈"],horizontal=True)
 
