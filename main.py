@@ -1,9 +1,5 @@
 import streamlit as st
-import pages.quiz_creation_page
-import pages.quiz_solve_page
-import pages.quiz_grading_page
-import pages.awscog
-import pages.sign
+from pages import quiz_creation_page, quiz_solve_page, quiz_grading_page, awscog, sign
 from streamlit_option_menu import option_menu
 import os
 from dotenv import load_dotenv
@@ -22,6 +18,8 @@ def main():
         pages.quiz_grading_page.quiz_grading_page()
     elif selected_page == "로그인":
         pages.awscog.start()
+    elif selected_page == "회원가입":
+        pages.sign.sign()
 
 if __name__ == "__main__":
     main()
