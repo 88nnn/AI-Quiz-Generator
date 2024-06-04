@@ -15,7 +15,7 @@ def start():
             if st.button('로그아웃'):
                 st.session_state.user = None
                 st.experimental_rerun()
-            elif st.button("퀴즈 저장"):
+            if st.button("퀴즈 저장"):
                 st.write("저장되셨습니다: 결과")
                 if st.button('퀴즈 생성 바로가기'):
                     st.switch_page("quiz_creation_page")
