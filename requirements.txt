@@ -30,6 +30,7 @@ Pillow
 faiss_cpu
 wikipedia
 beautifulsoup4
-streamlit_cognito-auth
+streamlit_cognito_auth
 boto3
 CognitoAuth
+aws_cognito_authentication
