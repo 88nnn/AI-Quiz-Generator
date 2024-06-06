@@ -45,7 +45,7 @@ def start():
                 st.switch_page("pages/quiz_creation_page.py")
             
             region_name = 'us-east-1'
-            client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+            client_id = '7bdv436rrb0l7nhbsva60t7242'
             user_pool_id = 'us-east-1_pJbggBo44'
 
             st.header("로그인 | ID: admin / PW: Admin12!")
