@@ -4,7 +4,7 @@ import boto3
 def register_cognito_user(username, password):
     region_name = 'us-east-1'
     client_id = '7bdv436rrb0l7nhbsva60t7242'
-    user_pool_id = 'us-east-1_TXA2Lha1Y'
+    user_pool_id = 'us-east-1_pJbggBo44'
     
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
 
@@ -33,7 +33,7 @@ def sign():
             st.success("회원가입이 완료되었습니다! 자동으로 로그인됩니다...")
             # 자동 로그인 시도
             region_name = 'us-east-1'
-            client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+            client_id = '7bdv436rrb0l7nhbsva60t7242'
             cognito_client = boto3.client('cognito-idp', region_name=region_name)
             try:
                 response = cognito_client.initiate_auth(
