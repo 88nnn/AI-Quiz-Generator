@@ -3,7 +3,7 @@ import boto3
 
 def register_cognito_user(username, password):
     region_name = 'us-east-1'
-    client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+    client_id = '7bdv436rrb0l7nhbsva60t7242'
     user_pool_id = 'us-east-1_TXA2Lha1Y'
     
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
