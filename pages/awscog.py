@@ -48,7 +48,7 @@ def start():
             client_id = '7bdv436rrb0l7nhbsva60t7242'
             user_pool_id = 'us-east-1_pJbggBo44'
 
-            st.header("로그인 | ID: admin / PW: Admin12!")
+            st.header("로그인 | ID: admin2 / PW: Admin22!")
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
 
