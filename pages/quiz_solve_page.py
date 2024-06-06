@@ -102,6 +102,17 @@ def quiz_solve_page():
         st.session_state.canswer = ""
     if 'uanswer' not in st.session_state:
         st.session_state.uanswer = ""
+
+     if 'user' in st.session_state and st.session_state.user != "unknown" and st.session_state.user != "":
+        st.sidebar.header("메모 남기기")
+        memo_text = st.text_input(label="메모 남기기", value="메모 입력")
+        
+        display_memos()
+
+        if st.button("메모 등록"):
+            if memo_text:
+                save_memo(st.session_state.user, memo_text)
+                st.experimental_rerun()
         
     for j, question in enumerate(st.session_state.quizs):
         res = json.loads(question["answer"])
