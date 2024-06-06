@@ -51,7 +51,7 @@ def start():
             
             # AWS Cognito 설정
             region_name = 'us-east-1'
-            client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+            client_id = '7bdv436rrb0l7nhbsva60t7242'
 
             # Streamlit UI
             st.header("로그인 | ID: admin / PW: Admin12!")
