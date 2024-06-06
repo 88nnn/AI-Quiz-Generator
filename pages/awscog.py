@@ -64,7 +64,31 @@ def start():
                         }
                     )
                     st.write(response)  # 디버깅을 위해 전체 응답 출력
-                    if 'AuthenticationResult' in response:
+                    if 'ChallengeName' in response and response['ChallengeName'] == 'NEW_PASSWORD_REQUIRED':
+                        new_password = st.text_input("새 비밀번호를 입력하세요:", type="password")
+                        if st.button("비밀번호 변경"):
+                            try:
+                                challenge_response = cognito_client.respond_to_auth_challenge(
+                                    ClientId=client_id,
+                                    ChallengeName='NEW_PASSWORD_REQUIRED',
+                                    Session=response['Session'],
+                                    ChallengeResponses={
+                                        'USERNAME': username,
+                                        'NEW_PASSWORD': new_password
+                                    }
+                                )
+                                st.write(challenge_response)  # 디버깅을 위해 전체 응답 출력
+                                if 'AuthenticationResult' in challenge_response:
+                                    authentication_result = challenge_response['AuthenticationResult']
+                                    access_token = authentication_result['AccessToken']
+                                    st.session_state.user = username
+                                    st.session_state.access_token = access_token
+                                    st.experimental_rerun()
+                                else:
+                                    st.error("비밀번호 변경에 실패했습니다.")
+                            except Exception as e:
+                                st.error(f"비밀번호 변경 중 오류 발생: {str(e)}")
+                    elif 'AuthenticationResult' in response:
                         authentication_result = response['AuthenticationResult']
                         access_token = authentication_result['AccessToken']
                         st.session_state.user = username
