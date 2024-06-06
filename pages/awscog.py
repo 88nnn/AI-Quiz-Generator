@@ -56,7 +56,7 @@ def start():
             user_pool_id = 'us-east-1_TXA2Lha1Y'
 
             # Streamlit UI
-            st.header("로그인 | ID: admin / PW: admin12!")
+            st.header("로그인 | ID: admin / PW: Admin12!")
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
 
