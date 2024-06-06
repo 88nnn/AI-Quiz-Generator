@@ -6,7 +6,7 @@ def save_memo(user, memo_text):
 
 def display_memos():
     con = st.container()
-    con.caption("Result")
+    con.caption("메모 내용")
     try:
         with open("memoRecord.txt", "r") as file:
             for line in file:
