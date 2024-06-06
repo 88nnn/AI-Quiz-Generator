@@ -4,8 +4,8 @@ import boto3
 def logout_cognito():
     # 코그니토 클라이언트 초기화
     region_name = 'us-east-1'
-    client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
-    user_pool_id = 'us-east-1_TXA2Lha1Y'
+    client_id = '7bdv436rrb0l7nhbsva60t7242'
+    user_pool_id = 'us-east-1_pJbggBo44'
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
 
     # 현재 사용자 정보 가져오기
