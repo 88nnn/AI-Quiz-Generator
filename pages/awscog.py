@@ -33,11 +33,7 @@ def start():
             if st.button('로그아웃'):
                 logout_cognito()
                 st.experimental_rerun()
-            st.header("준비 중입니다."):
-                if st.button("퀴즈 저장"):
-                    st.write("저장되셨습니다: 결과")
-                if st.button('퀴즈 생성 바로가기'):
-                    st.switch_page("pages/quiz_creation_page.py")
+           
     else:
         with placeholder.container():
             st.title("비회원으로 퀴즈 이용하러 돌아가기")
