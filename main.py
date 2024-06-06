@@ -5,9 +5,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from memo import save_memo, display_memos
-st.set_page_config(
-    page_title="memo",
-)
+
 
 
 def main():
