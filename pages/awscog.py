@@ -2,14 +2,10 @@ import streamlit as st
 import boto3
 
 def logout_cognito():
-    # 코그니토 클라이언트 초기화
     region_name = 'us-east-1'
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
-
-    # Access Token 가져오기
     access_token = st.session_state.get('access_token')
-    
-    # 코그니토에서 사용자 세션 무효화
+
     try:
         cognito_client.global_sign_out(
             AccessToken=access_token
@@ -20,40 +16,38 @@ def logout_cognito():
     except Exception as e:
         st.error(f"로그아웃 중 오류 발생: {str(e)}")
 
-    # Streamlit 세션에서 사용자 정보 제거
     st.session_state.user = None
     st.session_state.access_token = None
 
 def start():
     placeholder = st.empty()
     if 'user' not in st.session_state:
-        st.session_state.user = None  # 초기화
-    
+        st.session_state.user = None
+
     if st.session_state.user:
         with placeholder.container():
             st.title("퀴즈 이용하러 돌아가기")
             if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("pages/quiz_creation_page.py")  # 페이지 전환
+                st.switch_page("pages/quiz_creation_page.py")
             st.title("여기는 로그인한 가입자 전용 서비스입니다.")
             if st.button('로그아웃'):
-                logout_cognito()  # 코그니토 로그아웃 수행
+                logout_cognito()
                 st.experimental_rerun()
             if st.header("준비 중입니다."):
                 if st.button("퀴즈 저장"):
                     st.write("저장되셨습니다: 결과")
                     if st.button('퀴즈 생성 바로가기'):
-                        st.switch_page("pages/quiz_creation_page.py")   # 페이지 전환
+                        st.switch_page("pages/quiz_creation_page.py")
     else:
         with placeholder.container():
             st.title("비회원으로 퀴즈 이용하러 돌아가기")
             if st.button('퀴즈 생성 바로가기'):
-                st.switch_page("pages/quiz_creation_page.py")   # 페이지 전환
+                st.switch_page("pages/quiz_creation_page.py")
             
-            # AWS Cognito 설정
             region_name = 'us-east-1'
-            client_id = '7bdv436rrb0l7nhbsva60t7242'
+            client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
+            user_pool_id = 'us-east-1_pJbggBo44'
 
-            # Streamlit UI
             st.header("로그인 | ID: admin / PW: Admin12!")
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
@@ -69,19 +63,22 @@ def start():
                             'PASSWORD': password
                         }
                     )
-                    #authentication_result = response['AuthenticationResult']
-                    access_token = authentication_result['AccessToken']
-                    st.write(f"Welcome, {username}")
-                    st.session_state.user = username  # 유저네임 저장
-                    st.session_state.access_token = access_token  # 액세스 토큰 저장
-                    st.experimental_rerun()
+                    st.write(response)  # 디버깅을 위해 전체 응답 출력
+                    if 'AuthenticationResult' in response:
+                        authentication_result = response['AuthenticationResult']
+                        access_token = authentication_result['AccessToken']
+                        st.session_state.user = username
+                        st.session_state.access_token = access_token
+                        st.experimental_rerun()
+                    else:
+                        st.error("인증에 실패했습니다. 사용자 이름 또는 비밀번호를 확인해주세요.")
                 except cognito_client.exceptions.NotAuthorizedException:
                     st.error("인증 실패: 사용자 이름 또는 비밀번호가 올바르지 않습니다.")
                 except Exception as e:
                     st.error(f"오류 발생: {str(e)}")
 
             if st.button('회원가입'):
-                st.switch_page("pages/sign.py")  # 페이지 전환
+                st.switch_page("pages/sign.py")
 
 if __name__ == "__main__":
     start()
