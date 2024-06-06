@@ -39,4 +39,3 @@ def memo():
                 save_memo(user, memo_text)
                 st.experimental_rerun()
 
-memo()
