@@ -4,17 +4,15 @@ import boto3
 def logout_cognito():
     # 코그니토 클라이언트 초기화
     region_name = 'us-east-1'
-    client_id = '7bdv436rrb0l7nhbsva60t7242'
-    user_pool_id = 'us-east-1_pJbggBo44'
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
 
-    # 현재 사용자 정보 가져오기
-    username = st.session_state.user
+    # Access Token 가져오기
+    access_token = st.session_state.get('access_token')
     
     # 코그니토에서 사용자 세션 무효화
     try:
         cognito_client.global_sign_out(
-            AccessToken=username
+            AccessToken=access_token
         )
         st.write("로그아웃되었습니다.")
     except cognito_client.exceptions.NotAuthorizedException:
@@ -24,6 +22,7 @@ def logout_cognito():
 
     # Streamlit 세션에서 사용자 정보 제거
     st.session_state.user = None
+    st.session_state.access_token = None
 
 def start():
     placeholder = st.empty()
@@ -53,7 +52,6 @@ def start():
             # AWS Cognito 설정
             region_name = 'us-east-1'
             client_id = '57gm5vjnk9p3ehk9hn5s97ropu'
-            user_pool_id = 'us-east-1_TXA2Lha1Y'
 
             # Streamlit UI
             st.header("로그인 | ID: admin / PW: Admin12!")
@@ -71,9 +69,11 @@ def start():
                             'PASSWORD': password
                         }
                     )
-                    user = response['AuthenticationResult']
+                    authentication_result = response['AuthenticationResult']
+                    access_token = authentication_result['AccessToken']
                     st.write(f"Welcome, {username}")
                     st.session_state.user = username  # 유저네임 저장
+                    st.session_state.access_token = access_token  # 액세스 토큰 저장
                     st.experimental_rerun()
                 except cognito_client.exceptions.NotAuthorizedException:
                     st.error("인증 실패: 사용자 이름 또는 비밀번호가 올바르지 않습니다.")
