@@ -4,8 +4,6 @@ import boto3
 def register_cognito_user(username, password):
     region_name = 'us-east-1'
     client_id = '7bdv436rrb0l7nhbsva60t7242'
-    user_pool_id = 'us-east-1_pJbggBo44'
-    
     cognito_client = boto3.client('cognito-idp', region_name=region_name)
 
     try:
@@ -31,7 +29,7 @@ def sign():
     if st.button("회원가입"):
         if register_cognito_user(new_username, new_password):
             st.success("회원가입이 완료되었습니다! 자동으로 로그인됩니다...")
-            # 자동 로그인 시도
+            
             region_name = 'us-east-1'
             client_id = '7bdv436rrb0l7nhbsva60t7242'
             cognito_client = boto3.client('cognito-idp', region_name=region_name)
@@ -44,11 +42,15 @@ def sign():
                         'PASSWORD': new_password
                     }
                 )
-                authentication_result = response['AuthenticationResult']
-                access_token = authentication_result['AccessToken']
-                st.session_state.user = new_username  # 유저네임 저장
-                st.session_state.access_token = access_token  # 액세스 토큰 저장
-                st.experimental_rerun()
+                st.write(response)  # 디버깅을 위해 전체 응답 출력
+                if 'AuthenticationResult' in response:
+                    authentication_result = response['AuthenticationResult']
+                    access_token = authentication_result['AccessToken']
+                    st.session_state.user = new_username
+                    st.session_state.access_token = access_token
+                    st.experimental_rerun()
+                else:
+                    st.error("자동 로그인에 실패했습니다. 로그인 페이지로 이동하세요.")
             except Exception as e:
                 st.error(f"자동 로그인 중 오류 발생: {str(e)}")
 
