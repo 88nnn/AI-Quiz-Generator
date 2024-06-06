@@ -69,7 +69,7 @@ def start():
                             'PASSWORD': password
                         }
                     )
-                    authentication_result = response['AuthenticationResult']
+                    #authentication_result = response['AuthenticationResult']
                     access_token = authentication_result['AccessToken']
                     st.write(f"Welcome, {username}")
                     st.session_state.user = username  # 유저네임 저장
