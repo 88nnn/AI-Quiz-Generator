@@ -103,8 +103,8 @@ def quiz_solve_page():
     if 'uanswer' not in st.session_state:
         st.session_state.uanswer = ""
     if 'user' in st.session_state and st.session_state.user:
-        st.sidebar.header("메모 남기기")
-        memo_text = st.text_area("메모 입력", "메모 입력", height=150)
+        st.sidebar.header("오답노트 남기기")
+        memo_text = st.text_area("오답노트 입력", "오답노트 입력", height=150)
         
         
     for j, question in enumerate(st.session_state.quizs):
