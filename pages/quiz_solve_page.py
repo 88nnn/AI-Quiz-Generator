@@ -105,10 +105,7 @@ def quiz_solve_page():
     if 'user' in st.session_state and st.session_state.user:
         st.sidebar.header("메모 남기기")
         memo_text = st.text_area("메모 입력", "메모 입력", height=150)
-        display_memos()
-        if st.button("메모 등록"):
-            if memo_text:
-                save_memo(st.session_state.user, memo_text)
+        
         
     for j, question in enumerate(st.session_state.quizs):
         res = json.loads(question["answer"])
