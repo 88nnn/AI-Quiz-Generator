@@ -38,6 +38,7 @@ def sign():
     if st.button("회원가입"):
         if register_cognito_user(new_username, new_password, new_email):
             st.success("회원가입이 완료되었습니다.")
+            st.write("운영자가 가입을 승인할 때까지 기다려주세요!")
             st.experimental_rerun()
         else:
             st.error("회원가입에 실패했습니다. 다시 시도하세요.")
